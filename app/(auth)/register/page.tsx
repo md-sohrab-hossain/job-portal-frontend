@@ -39,7 +39,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-start justify-center w-xl m-auto">
+    <div className="flex items-start justify-center w-xl m-auto z-10">
       <RegisterForm
         onSubmit={onSubmit}
         profilePhoto={profilePhoto}

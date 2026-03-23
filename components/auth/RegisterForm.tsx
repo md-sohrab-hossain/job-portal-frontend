@@ -40,6 +40,7 @@ const RegisterForm = ({
     handleSubmit,
     watch,
     setValue,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -72,7 +73,6 @@ const RegisterForm = ({
       ))}
 
       <SkillInput
-        // eslint-disable-next-line react-hooks/incompatible-library
         value={watch("profileSkills") ?? []}
         onChange={(skills) => setValue("profileSkills", skills)}
         error={errors.profileSkills?.message as string | undefined}
@@ -125,9 +125,10 @@ const RegisterForm = ({
         error={errors.role?.message}
         required
         value={watch("role") ?? ""}
-        onValueChange={(value) =>
-          setValue("role", value as "student" | "recruiter")
-        }
+        onValueChange={(value) => {
+          setValue("role", value as "student" | "recruiter");
+          trigger("role");
+        }}
       />
 
       <Button

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
 import { useState } from "react";
@@ -26,6 +25,7 @@ const LoginForm = ({ onSubmit }: LoginFormProps) => {
     handleSubmit,
     watch,
     setValue,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -62,9 +62,10 @@ const LoginForm = ({ onSubmit }: LoginFormProps) => {
         error={errors.role?.message}
         required
         value={watch("role") ?? ""}
-        onValueChange={(value) =>
-          setValue("role", value as "student" | "recruiter")
-        }
+        onValueChange={(value) => {
+          setValue("role", value as "student" | "recruiter");
+          trigger("role");
+        }}
       />
 
       <Button

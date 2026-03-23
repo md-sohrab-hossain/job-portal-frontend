@@ -36,7 +36,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-start justify-center w-xl m-auto">
+    <div className="flex items-start justify-center w-xl m-auto z-10">
       <LoginForm onSubmit={onSubmit} />
     </div>
   );

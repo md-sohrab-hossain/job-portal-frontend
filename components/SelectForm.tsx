@@ -45,7 +45,7 @@ const SelectForm = ({
           {required && <span className="text-red-500 ml-1">*</span>}
         </Label>
       )}
-      <Select name={name} value={value ?? ""} onValueChange={onValueChange}>
+      <Select name={name} value={value || ""} onValueChange={onValueChange}>
         <SelectTrigger
           id={name}
           className={`w-full h-9 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-yellow-400 focus:ring-0 ${

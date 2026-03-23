@@ -7,6 +7,7 @@ const eslintConfig = [
   {
     rules: {
       "react-hooks/exhaustive-deps": "off",
+      "react-hooks/incompatible-library": "off",
     },
   },
 ];
