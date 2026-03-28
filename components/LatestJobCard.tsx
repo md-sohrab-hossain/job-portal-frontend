@@ -1,28 +1,24 @@
-import { Badge } from "./ui/badge";
 import Image from "next/image";
-import { Briefcase, DollarSign } from "lucide-react";
 import { Job } from "@/types/job";
+import { Badge } from "./ui/badge";
+import { Briefcase, Building2 } from "lucide-react";
 
 const LatestJobCard = ({ job }: { job: Job }) => {
-  const companyInitial = job.company?.name?.charAt(0) ?? "C";
+  const hasLogo = !!job.company?.logo;
 
   return (
     <div className="p-5 rounded-2xl shadow-xl flex flex-col gap-4 bg-black/40 border border-gray-800 hover:border-yellow-400/50 transition-all cursor-pointer">
       <div className="flex items-start gap-4">
-        <div className="relative w-12 h-12 shrink-0 bg-white rounded-lg p-1">
-          {job.company?.logo ? (
+        <div className="w-12 h-12 shrink-0 bg-white rounded-lg flex items-center justify-center">
+          {hasLogo ? (
             <Image
-              src={job.company.logo}
-              alt={job.company.name}
+              src={job.company!.logo!}
+              alt={job.company!.name}
               fill
-              className="object-contain"
+              className="object-contain rounded-lg"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded">
-              <span className="text-xs font-bold text-gray-500">
-                {companyInitial}
-              </span>
-            </div>
+            <Building2 className="w-6 h-6 text-gray-400" />
           )}
         </div>
         <div className="flex-1 min-w-0">
@@ -43,9 +39,8 @@ const LatestJobCard = ({ job }: { job: Job }) => {
         <Badge className="bg-blue-400/10 text-blue-400 border border-blue-400/20">
           {job.jobType}
         </Badge>
-        <Badge className="bg-green-400/10 text-green-400 border border-green-400/20">
-          <DollarSign className="w-3 h-3 mr-1" />
-          {job.salary.toLocaleString("en-US")}
+        <Badge className="bg-green-400/20 text-green-400 border border-green-400/30 text-base font-semibold py-1">
+          BDT {job.salary.toLocaleString("en-US")}
         </Badge>
       </div>
     </div>

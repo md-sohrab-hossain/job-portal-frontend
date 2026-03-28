@@ -6,13 +6,13 @@ export default async function Home() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/job?keyword=`, {
     cache: "no-cache",
   });
-  const { jobs } = await res.json();
+  const { data } = await res.json();
 
   return (
     <div>
       <MainSection />
       <ShowCategories />
-      <LatestJobs allJobs={jobs} />
+      <LatestJobs allJobs={data} />
     </div>
   );
 }
