@@ -1,38 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useLocalStorage } from "@mantine/hooks";
-import { useSyncExternalStore } from "react";
-
-type Role = "recruiter" | "student";
-
-interface UserData {
-  data: {
-    id: string;
-    role: Role;
-  };
-}
+import { Role } from "@/types/user";
+import { useAuth } from "@/context/auth-context";
+import { ROUTES } from "@/lib/routes";
+import { toast } from "sonner";
 
 const NAV_LINKS: Record<Role, { href: string; label: string }[]> = {
   recruiter: [
-    { href: "/dashboard/companies", label: "Companies" },
-    { href: "/dashboard/jobs", label: "Jobs" },
+    { href: ROUTES.ADMIN.COMPANIES, label: "Companies" },
+    { href: ROUTES.ADMIN.JOBS, label: "Jobs" },
   ],
   student: [
-    { href: "/findjobs", label: "Find Jobs" },
-    { href: "/favorite", label: "Favorites" },
+    { href: ROUTES.FIND_JOBS, label: "Find Jobs" },
+    { href: ROUTES.FAVORITE, label: "Favorites" },
   ],
 };
 
 const DEFAULT_ROLE: Role = "student";
-
-const useIsClientMounted = () =>
-  useSyncExternalStore(
-    () => () => {}, // no external store to subscribe to
-    () => true, // client snapshot → mounted
-    () => false, // server snapshot → not mounted
-  );
 
 const NavLink = ({ href, label }: { href: string; label: string }) => (
   <li>
@@ -63,23 +48,14 @@ const NavButton = ({
 );
 
 const Navbar = () => {
-  const router = useRouter();
-  const mounted = useIsClientMounted();
-  const [user, setUser] = useLocalStorage<UserData | null>({
-    key: "userData",
-    defaultValue: null,
-  });
+  const { user, isAuthenticated, logout } = useAuth();
 
   const handleLogout = () => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/logout`, {
-      cache: "no-cache",
-    });
-    setUser(null);
-    router.push("/login");
+    logout();
+    toast.success("Logged out successfully");
   };
 
-  const isLoggedIn = mounted && Boolean(user?.data);
-  const role: Role = user?.data?.role ?? DEFAULT_ROLE;
+  const role: Role = user?.role ?? DEFAULT_ROLE;
   const roleLinks = NAV_LINKS[role];
 
   return (
@@ -94,17 +70,12 @@ const Navbar = () => {
         <ul className="flex font-medium items-center gap-5">
           <NavLink href="/" label="Home" />
 
-          {!mounted ? (
-            <li
-              className="w-32 h-4 bg-white/10 rounded animate-pulse"
-              aria-hidden
-            />
-          ) : isLoggedIn ? (
+          {isAuthenticated ? (
             <>
               {roleLinks.map((link) => (
                 <NavLink key={link.href} {...link} />
               ))}
-              <NavLink href="/profile" label="Profile" />
+              <NavLink href={ROUTES.PROFILE} label="Profile" />
               <NavButton label="Logout" onClick={handleLogout} />
             </>
           ) : (

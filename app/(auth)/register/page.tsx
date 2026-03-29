@@ -3,10 +3,10 @@
 import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { register } from "@/actions/register";
 import { RegisterInput } from "@/lib/schemas/register";
 import RegisterForm from "@/components/auth/RegisterForm";
 import { handleFileUpload } from "@/lib/helpers/register";
+import { api } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -27,15 +27,19 @@ export default function RegisterPage() {
       profileResume: profileResume || undefined,
     };
 
-    const response = await register(payload);
+    try {
+      const response = await api.auth.register(payload);
 
-    if (response?.error) {
-      toast.error(response.error);
-      return;
+      if (!response.success) {
+        toast.error(response.message || "Registration failed");
+        return;
+      }
+
+      toast.success("Registration successful! Please login.");
+      router.push("/login");
+    } catch {
+      toast.error("Something went wrong");
     }
-
-    toast.success("Registration successful! Please login.");
-    router.push("/login");
   };
 
   return (

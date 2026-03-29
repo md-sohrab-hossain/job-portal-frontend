@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
-import { login } from "@/actions/login";
-import LoginForm from "@/components/auth/LoginForm";
-import { useLocalStorage } from "@mantine/hooks";
 import { useRouter } from "next/navigation";
+import { useLocalStorage } from "@mantine/hooks";
 import { toast } from "sonner";
 import { LoginInput } from "@/lib/schemas/login";
+import LoginForm from "@/components/auth/LoginForm";
+import { api } from "@/lib/api";
+import { ROUTES } from "@/lib/routes";
+import { AuthUser } from "@/types/api";
 
 const Login = () => {
   const router = useRouter();
-  const [user, setUser] = useLocalStorage<{ role?: string }>({
+  const [user, setUserData] = useLocalStorage<{ role?: string }>({
     key: "userData",
     defaultValue: {},
   });
@@ -24,15 +26,26 @@ const Login = () => {
   }, []);
 
   const onSubmit = async (data: LoginInput) => {
-    const response = await login(data);
+    try {
+      const response = await api.auth.login(data);
 
-    if (response?.error) {
-      toast.error(response.error);
-      return;
+      if (!response.success) {
+        toast.error(response.message || "Login failed");
+        return;
+      }
+
+      toast.success("Login successful");
+      setUserData(response.data as AuthUser);
+
+      const user = response.data as { role?: string } | undefined;
+      if (user?.role === "recruiter") {
+        router.push(ROUTES.ADMIN.HOME);
+      } else {
+        router.push(ROUTES.HOME);
+      }
+    } catch {
+      toast.error("Something went wrong");
     }
-
-    setUser(response?.result);
-    router?.push("/");
   };
 
   return (

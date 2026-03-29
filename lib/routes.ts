@@ -4,6 +4,14 @@ export const ROUTES = {
   REGISTER: "/register",
   FIND_JOBS: "/findjobs",
   JOB_DETAILS: (id: string) => `/findjobs/${id}`,
+  FAVORITE: "/favorite",
+  PROFILE: "/profile",
+
+  ADMIN: {
+    HOME: "/admin/companies",
+    COMPANIES: "/dashboard/companies",
+    JOBS: "/dashboard/jobs",
+  },
 
   QUERY_PARAMS: {
     SEARCH: "search",

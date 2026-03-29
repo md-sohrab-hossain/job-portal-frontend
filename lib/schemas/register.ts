@@ -14,7 +14,7 @@ export const registerSchema = z.object({
     .min(1, "Phone number is required")
     .regex(
       /^\+[1-9]\d{1,14}$/,
-      "Phone number must include country code (e.g., +1234567890)"
+      "Phone number must include country code (e.g., +1234567890)",
     ),
   password: z
     .string()
@@ -25,7 +25,7 @@ export const registerSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least 1 number")
     .regex(
       /[!@#$%^&*(),.?":{}|<>]/,
-      "Password must contain at least 1 special character"
+      "Password must contain at least 1 special character",
     ),
   profileBio: z.string().optional(),
   profileSkills: z.array(z.string()).optional(),

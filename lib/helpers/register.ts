@@ -15,12 +15,14 @@ const FILE_CONFIG = {
 export async function handleFileUpload(
   file: File,
   type: "photo" | "resume",
-  onSuccess: (url: string) => void
+  onSuccess: (url: string) => void,
 ) {
   const config = FILE_CONFIG[type];
 
   if (!config.allowedTypes.includes(file.type)) {
-    toast.error(type === "photo" ? "Please upload a valid image" : "Please upload a PDF");
+    toast.error(
+      type === "photo" ? "Please upload a valid image" : "Please upload a PDF",
+    );
     return;
   }
 
@@ -33,7 +35,9 @@ export async function handleFileUpload(
     const upload = await uploadFile(file);
     if (upload?.url) {
       onSuccess(upload.url);
-      toast.success(`${type === "photo" ? "Photo" : "Resume"} uploaded successfully`);
+      toast.success(
+        `${type === "photo" ? "Photo" : "Resume"} uploaded successfully`,
+      );
     }
   } catch {
     toast.error("Upload failed");

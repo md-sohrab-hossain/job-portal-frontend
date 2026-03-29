@@ -5,6 +5,7 @@ import MantProvider from "./providers/MantProvider";
 import { Toaster } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { AuthProvider } from "@/context/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,10 +34,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <MantProvider>
-          <Toaster />
-          <Navbar />
-          {children}
-          <Footer />
+          <AuthProvider>
+            <Toaster />
+            <Navbar />
+            {children}
+            <Footer />
+          </AuthProvider>
         </MantProvider>
       </body>
     </html>
