@@ -124,6 +124,10 @@ export const api = {
     favorite: (jobId: string) =>
       nextFetch(`/api/jobs/favorite/${jobId}`, { method: "POST" }),
   },
-  applications: createCrudMethods("/applications"),
+  applications: {
+    getAll: () => nextFetch("/api/applications"),
+    getById: (id: string) => nextFetch(`/api/applications/${id}`),
+    checkApplied: (jobId: string) => nextFetch(`/api/applications/applied/${jobId}`),
+  },
   companies: createCrudMethods("/company"),
 };

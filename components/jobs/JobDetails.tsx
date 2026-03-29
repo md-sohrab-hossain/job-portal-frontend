@@ -3,24 +3,18 @@
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useLocalStorage } from "@mantine/hooks";
 import { toast } from "sonner";
 import { JobDetailsProps } from "@/types/job";
-import { AuthUser } from "@/types/api";
 import { api } from "@/lib/api";
 import { ROUTES } from "@/lib/routes";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
 
 export default function JobDetails({ job, jobId }: JobDetailsProps) {
   const [isApplied, setIsApplied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [user] = useLocalStorage<AuthUser | null>({
-    key: "userData",
-    defaultValue: null,
-  });
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
-
-  const isAuthenticated = !!user;
 
   useEffect(() => {
     if (job && user) {

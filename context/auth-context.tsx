@@ -1,28 +1,49 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
-import { useLocalStorage } from "@mantine/hooks";
+import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import { AuthUser } from "@/types/api";
 import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  login: (user: AuthUser) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [userData] = useLocalStorage<AuthUser | null>({
-    key: "userData",
-    defaultValue: null,
-  });
+  const [userData, setUserData] = useState<AuthUser | null>(null);
+  const router = useRouter();
 
-  const logout = () => {
-    localStorage.removeItem("userData");
-    api.auth.logout();
-    window.location.href = "/login";
+  useEffect(() => {
+    const stored = localStorage.getItem("userData");
+    if (stored) {
+      try {
+        setUserData(JSON.parse(stored));
+      } catch {
+        setUserData(null);
+      }
+    }
+  }, []);
+
+  const login = (user: AuthUser) => {
+    localStorage.setItem("userData", JSON.stringify(user));
+    setUserData(user);
+  };
+
+  const logout = async () => {
+    try {
+      await api.auth.logout();
+    } catch {
+      // Ignore API errors
+    } finally {
+      localStorage.removeItem("userData");
+      setUserData(null);
+      router.push("/login");
+    }
   };
 
   return (
@@ -30,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user: userData,
         isAuthenticated: !!userData,
+        login,
         logout,
       }}
     >

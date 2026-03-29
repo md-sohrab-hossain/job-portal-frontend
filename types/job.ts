@@ -11,6 +11,11 @@ export interface Job {
   jobType: string;
   salary: number;
   company: Company;
+  createdAt?: string;
+  location?: string;
+  requirements?: string[];
+  experienceLevel?: number;
+  applications?: Application[];
 }
 
 export interface Application {

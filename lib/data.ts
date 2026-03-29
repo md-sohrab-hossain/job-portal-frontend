@@ -1,28 +1,41 @@
 export const categories = [
   "Frontend Developer",
   "Backend Developer",
-  "Full stack developer",
+  "Full Stack Developer",
   "Data Science",
   "Graphic Designer",
-  "UI Developer",
+  "UI/UX Designer",
   "Software Engineer",
+  "DevOps Engineer",
 ];
+
+export const jobTypes = [
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Internship",
+  "Remote",
+];
+
+export const experienceLevels = [
+  "Entry Level",
+  "Mid Level",
+  "Senior Level",
+  "Lead",
+  "Manager",
+];
+
 export const filterData = [
   {
     filterType: "Location",
-    array: ["Lahore", "Karachi", "Islamabad"],
+    array: ["Dhaka", "Chittagong", "Sylhet", "Rajshahi", "Khulna", "Barishal"],
   },
   {
     filterType: "Job Type",
-    array: [
-      "Frontend Developer",
-      "Backend Developer",
-      "Full Stack Developer",
-      "Web Developer",
-    ],
+    array: jobTypes,
   },
   {
-    filterType: "Salary",
-    array: ["0-50000", "50000-100000", "100000-200000"],
+    filterType: "Salary Range",
+    array: ["10000-30000", "30000-50000", "50000-80000", "80000-150000", "150000+"],
   },
 ];

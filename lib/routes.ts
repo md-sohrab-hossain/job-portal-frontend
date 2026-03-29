@@ -14,7 +14,7 @@ export const ROUTES = {
   },
 
   QUERY_PARAMS: {
-    SEARCH: "search",
+    KEYWORD: "keyword",
     CATEGORY: "category",
   },
 } as const;
@@ -23,7 +23,7 @@ export const getJobDetailsUrl = (id: string) => ROUTES.JOB_DETAILS(id);
 
 export const getFindJobsUrl = (search?: string, category?: string) => {
   const params = new URLSearchParams();
-  if (search) params.set(ROUTES.QUERY_PARAMS.SEARCH, search);
+  if (search) params.set(ROUTES.QUERY_PARAMS.KEYWORD, search);
   if (category) params.set(ROUTES.QUERY_PARAMS.CATEGORY, category);
   const query = params.toString();
   return query ? `${ROUTES.FIND_JOBS}?${query}` : ROUTES.FIND_JOBS;

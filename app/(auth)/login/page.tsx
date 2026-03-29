@@ -2,28 +2,25 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useLocalStorage } from "@mantine/hooks";
 import { toast } from "sonner";
 import { LoginInput } from "@/lib/schemas/login";
 import LoginForm from "@/components/auth/LoginForm";
 import { api } from "@/lib/api";
 import { ROUTES } from "@/lib/routes";
+import { useAuth } from "@/context/auth-context";
 import { AuthUser } from "@/types/api";
 
 const Login = () => {
   const router = useRouter();
-  const [user, setUserData] = useLocalStorage<{ role?: string }>({
-    key: "userData",
-    defaultValue: {},
-  });
+  const { user, login } = useAuth();
 
   useEffect(() => {
     if (user?.role == "recruiter") {
-      router?.push("/admin/companies");
+      router.push("/admin/companies");
     } else if (user?.role == "student") {
       router.push("/");
     }
-  }, []);
+  }, [user]);
 
   const onSubmit = async (data: LoginInput) => {
     try {
@@ -35,10 +32,9 @@ const Login = () => {
       }
 
       toast.success("Login successful");
-      setUserData(response.data as AuthUser);
+      login(response.data as AuthUser);
 
-      const user = response.data as { role?: string } | undefined;
-      if (user?.role === "recruiter") {
+      if ((response.data as AuthUser).role === "recruiter") {
         router.push(ROUTES.ADMIN.HOME);
       } else {
         router.push(ROUTES.HOME);
