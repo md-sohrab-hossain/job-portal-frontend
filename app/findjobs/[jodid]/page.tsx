@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import JobDetails from "@/components/jobs/JobDetails";
 import { api } from "@/lib/api";
 import { JobDetail } from "@/types/job";
+import { JobDetails } from "@/components/jobs";
 
 export default async function JobDetailsPage({
   params,
@@ -16,7 +16,7 @@ export default async function JobDetailsPage({
   }
 
   return (
-    <div className="max-w-6xl mx-auto my-10 px-4">
+    <div className="max-w-3xl mx-auto my-10 px-4">
       <JobDetails job={response.data as JobDetail} jobId={jobId} />
     </div>
   );

@@ -1,6 +1,8 @@
 export interface Company {
   name: string;
   logo?: string;
+  website?: string;
+  description?: string;
 }
 
 export interface Job {
@@ -29,6 +31,8 @@ export interface JobDetail extends Omit<Job, "company"> {
   experienceLevel: number;
   applications: Application[];
   createdAt: string;
+  company: Company;
+  profileSkills?: string[];
 }
 
 export interface JobDetailsProps {

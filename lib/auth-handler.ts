@@ -1,26 +1,25 @@
 import { NextResponse } from "next/server";
 import { loginSchema } from "@/lib/schemas";
+import { registerSchema } from "@/lib/schemas/register";
 import { ValidationError } from "@/lib/errors";
 import { handleError } from "@/lib/error-handler";
 import { API_URL } from "@/lib/constants";
+
+const API_AUTH = `${API_URL}`;
 
 async function authHandler(
   request: Request,
   options: {
     endpoint: string;
     forwardCookies?: boolean;
-    schema: "login" | "register";
+    schema: typeof loginSchema | typeof registerSchema;
   },
 ): Promise<NextResponse> {
   const { endpoint, forwardCookies = false, schema } = options;
-  const schemaValidator =
-    schema === "login"
-      ? loginSchema
-      : (await import("@/lib/schemas/register")).registerSchema;
 
   try {
     const body = await request.json();
-    const validation = schemaValidator.safeParse(body);
+    const validation = schema.safeParse(body);
 
     if (!validation.success) {
       throw new ValidationError(
@@ -28,7 +27,7 @@ async function authHandler(
       );
     }
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetch(`${API_AUTH}${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -36,25 +35,20 @@ async function authHandler(
     });
 
     const data = await response.json();
-    const statusCode = response.status;
-    const success = response.ok;
-
-    if (success && data.data) {
-      delete data.data.accessToken;
-      delete data.data.refreshToken;
-    }
-
     const nextResponse = NextResponse.json(
-      { success, statusCode, data: data.data, message: data.message },
-      { status: statusCode },
+      {
+        success: response.ok,
+        statusCode: response.status,
+        data: data.data,
+        message: data.message,
+      },
+      { status: response.status },
     );
 
     if (forwardCookies) {
-      const setCookies = response.headers.getSetCookie();
-      const uniqueCookies = [...new Set(setCookies)];
-      uniqueCookies.forEach((cookie) =>
-        nextResponse.headers.append("Set-Cookie", cookie),
-      );
+      response.headers.getSetCookie().forEach((cookie) => {
+        nextResponse.headers.append("Set-Cookie", cookie);
+      });
     }
 
     return nextResponse;
@@ -67,14 +61,14 @@ export async function loginHandler(request: Request) {
   return authHandler(request, {
     endpoint: "/user/login",
     forwardCookies: true,
-    schema: "login",
+    schema: loginSchema,
   });
 }
 
 export async function registerHandler(request: Request) {
   return authHandler(request, {
     endpoint: "/user/register",
-    forwardCookies: false,
-    schema: "register",
+    forwardCookies: true,
+    schema: registerSchema,
   });
 }

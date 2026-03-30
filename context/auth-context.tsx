@@ -1,13 +1,14 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useState, useEffect } from "react";
+import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from "react";
 import { AuthUser } from "@/types/api";
-import { api } from "@/lib/api";
+import { api, verifySession } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (user: AuthUser) => void;
   logout: () => void;
 }
@@ -16,18 +17,45 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    const stored = localStorage.getItem("userData");
-    if (stored) {
-      try {
-        setUserData(JSON.parse(stored));
-      } catch {
-        setUserData(null);
-      }
-    }
+  const verifyAuth = useCallback(async () => {
+    return await verifySession();
   }, []);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const stored = localStorage.getItem("userData");
+      
+      if (!stored) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(stored);
+        if (!parsed || !parsed.id || !parsed.email || !parsed.role) {
+          localStorage.removeItem("userData");
+          setIsLoading(false);
+          return;
+        }
+
+        const isValid = await verifyAuth();
+        if (isValid) {
+          setUserData(parsed);
+        } else {
+          localStorage.removeItem("userData");
+        }
+      } catch {
+        localStorage.removeItem("userData");
+      }
+      
+      setIsLoading(false);
+    };
+
+    initAuth();
+  }, [verifyAuth]);
 
   const login = (user: AuthUser) => {
     localStorage.setItem("userData", JSON.stringify(user));
@@ -51,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user: userData,
         isAuthenticated: !!userData,
+        isLoading,
         login,
         logout,
       }}
