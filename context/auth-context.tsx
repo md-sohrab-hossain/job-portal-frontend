@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserData(parsed);
         } else {
           localStorage.removeItem("userData");
+          router.push("/login");
         }
       } catch {
         localStorage.removeItem("userData");
@@ -55,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     initAuth();
-  }, [verifyAuth]);
+  }, [verifyAuth, router]);
 
   const login = (user: AuthUser) => {
     localStorage.setItem("userData", JSON.stringify(user));
