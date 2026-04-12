@@ -70,6 +70,20 @@ export function CompanyRow({ company, onEdit, onDelete }: CompanyRowProps) {
         </div>
       </TableCell>
 
+      <TableCell className="align-top pt-5 hidden lg:table-cell">
+        <div className="text-sm text-gray-600">
+          {company.createdAt ? (
+            new Intl.DateTimeFormat("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            }).format(new Date(company.createdAt))
+          ) : (
+            <span className="text-gray-400 italic">N/A</span>
+          )}
+        </div>
+      </TableCell>
+
       <TableCell className="align-top pt-4 pr-6">
         <div className="flex justify-end gap-1">
           <Button

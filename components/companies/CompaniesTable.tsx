@@ -186,6 +186,9 @@ export default function CompaniesTable() {
                   <TableHead className="font-semibold text-gray-600 hidden md:table-cell">
                     Contact & Links
                   </TableHead>
+                  <TableHead className="font-semibold text-gray-600 hidden lg:table-cell">
+                    Date
+                  </TableHead>
                   <TableHead className="font-semibold text-gray-600 text-right pr-6">
                     Actions
                   </TableHead>
