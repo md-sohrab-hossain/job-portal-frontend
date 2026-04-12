@@ -5,18 +5,13 @@ import { ValidationError } from "@/lib/errors";
 import { handleError } from "@/lib/error-handler";
 import { API_URL } from "@/lib/constants";
 
-const API_AUTH = `${API_URL}`;
+type AuthSchema = typeof loginSchema | typeof registerSchema;
 
 async function authHandler(
   request: Request,
-  options: {
-    endpoint: string;
-    forwardCookies?: boolean;
-    schema: typeof loginSchema | typeof registerSchema;
-  },
+  endpoint: string,
+  schema: AuthSchema,
 ): Promise<NextResponse> {
-  const { endpoint, forwardCookies = false, schema } = options;
-
   try {
     const body = await request.json();
     const validation = schema.safeParse(body);
@@ -27,7 +22,7 @@ async function authHandler(
       );
     }
 
-    const response = await fetch(`${API_AUTH}${endpoint}`, {
+    const response = await fetch(`${API_URL}${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -45,11 +40,10 @@ async function authHandler(
       { status: response.status },
     );
 
-    if (forwardCookies) {
-      response.headers.getSetCookie().forEach((cookie) => {
-        nextResponse.headers.append("Set-Cookie", cookie);
-      });
-    }
+    // Always forward auth cookies (accessToken, refreshToken) to the browser
+    response.headers.getSetCookie().forEach((cookie) => {
+      nextResponse.headers.append("Set-Cookie", cookie);
+    });
 
     return nextResponse;
   } catch (error) {
@@ -57,18 +51,11 @@ async function authHandler(
   }
 }
 
-export async function loginHandler(request: Request) {
-  return authHandler(request, {
-    endpoint: "/user/login",
-    forwardCookies: true,
-    schema: loginSchema,
-  });
+export function loginHandler(request: Request) {
+  return authHandler(request, "/user/login", loginSchema);
 }
 
-export async function registerHandler(request: Request) {
-  return authHandler(request, {
-    endpoint: "/user/register",
-    forwardCookies: true,
-    schema: registerSchema,
-  });
+export function registerHandler(request: Request) {
+  return authHandler(request, "/user/register", registerSchema);
 }
+

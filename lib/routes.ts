@@ -8,7 +8,7 @@ export const ROUTES = {
   PROFILE: "/profile",
 
   ADMIN: {
-    HOME: "/admin/companies",
+    HOME: "/",
     COMPANIES: "/dashboard/companies",
     JOBS: "/dashboard/jobs",
   },

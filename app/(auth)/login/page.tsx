@@ -16,9 +16,9 @@ const Login = () => {
 
   useEffect(() => {
     if (user?.role == "recruiter") {
-      router.push("/admin/companies");
+      router.push(ROUTES.ADMIN.HOME);
     } else if (user?.role == "student") {
-      router.push("/");
+      router.push(ROUTES.HOME);
     }
   }, [user]);
 

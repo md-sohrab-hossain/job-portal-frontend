@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import { AuthUser } from "@/types/api";
 import { api, verifySession } from "@/lib/api";
 import { useRouter } from "next/navigation";
@@ -20,14 +20,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const verifyAuth = useCallback(async () => {
-    return await verifySession();
-  }, []);
-
   useEffect(() => {
     const initAuth = async () => {
       const stored = localStorage.getItem("userData");
-      
+
       if (!stored) {
         setIsLoading(false);
         return;
@@ -35,13 +31,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       try {
         const parsed = JSON.parse(stored);
-        if (!parsed || !parsed.id || !parsed.email || !parsed.role) {
+
+        if (!parsed?.id || !parsed?.email || !parsed?.role) {
           localStorage.removeItem("userData");
           setIsLoading(false);
           return;
         }
 
-        const isValid = await verifyAuth();
+        const isValid = await verifySession();
         if (isValid) {
           setUserData(parsed);
         } else {
@@ -51,12 +48,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
         localStorage.removeItem("userData");
       }
-      
+
       setIsLoading(false);
     };
 
     initAuth();
-  }, [verifyAuth, router]);
+  }, [router]);
 
   const login = (user: AuthUser) => {
     localStorage.setItem("userData", JSON.stringify(user));
@@ -97,3 +94,4 @@ export function useAuth() {
   }
   return context;
 }
+

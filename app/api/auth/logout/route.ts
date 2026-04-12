@@ -6,7 +6,6 @@ export async function GET() {
     const cookieStore = await cookies();
     cookieStore.delete("accessToken");
     cookieStore.delete("refreshToken");
-    cookieStore.delete("userData");
 
     return NextResponse.json({
       success: true,

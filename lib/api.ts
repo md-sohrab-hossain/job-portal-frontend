@@ -1,81 +1,23 @@
 import { ApiResponse } from "@/types/api";
 import { API_URL } from "./constants";
 
-export async function verifySession(): Promise<boolean> {
-  try {
-    const response = await fetch(`${API_URL}/user/refresh`, {
-      method: "POST",
-      credentials: "include",
-    });
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
-
-type FetchOptions = RequestInit & { timeout?: number };
-
+// -- Token Refresh State --
 let isRefreshing = false;
-let refreshSubscribers: ((token: string) => void)[] = [];
-
-const subscribeTokenRefresh = (callback: (token: string) => void) => {
-  refreshSubscribers.push(callback);
-};
-
-const onTokenRefreshed = (token: string) => {
-  refreshSubscribers.forEach((callback) => callback(token));
-  refreshSubscribers = [];
-};
-
-async function fetchWithTimeout<T>(
-  url: string,
-  options: FetchOptions = {},
-): Promise<ApiResponse<T>> {
-  const { timeout = 10000, ...fetchOptions } = options;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetch(url, {
-      ...fetchOptions,
-      signal: controller.signal,
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(fetchOptions.headers as Record<string, string>),
-      },
-    });
-
-    clearTimeout(timeoutId);
-    const data = await response.json();
-
-    return {
-      success: response.ok,
-      statusCode: response.status,
-      ...data,
-    };
-  } catch (error) {
-    clearTimeout(timeoutId);
-    if (error instanceof Error && error.name === "AbortError") {
-      return { success: false, statusCode: 408, error: "Request timeout" };
-    }
-    return { success: false, statusCode: 500, error: "Network error" };
-  }
-}
+let refreshSubscribers: (() => void)[] = [];
 
 async function refreshToken(): Promise<boolean> {
   try {
-    const response = await fetch(`${API_URL}/user/refresh`, {
+    const res = await fetch(`${API_URL}/user/refresh`, {
       method: "POST",
       credentials: "include",
     });
-    return response.ok;
+    return res.ok;
   } catch {
     return false;
   }
 }
 
+// -- Core Fetch Utility (client-side, with token refresh) --
 async function nextFetch<T>(
   path: string,
   options: RequestInit & { timeout?: number } = {},
@@ -99,6 +41,7 @@ async function nextFetch<T>(
 
     clearTimeout(timeoutId);
 
+    // On 401: attempt token refresh once, then retry the original request
     if (response.status === 401 && retry) {
       if (!isRefreshing) {
         isRefreshing = true;
@@ -106,25 +49,20 @@ async function nextFetch<T>(
         isRefreshing = false;
 
         if (refreshed) {
-          onTokenRefreshed("");
+          refreshSubscribers.forEach((cb) => cb());
+          refreshSubscribers = [];
           return nextFetch<T>(path, options, false);
         }
       } else {
+        // Another request is already refreshing — queue up and wait
         return new Promise((resolve) => {
-          subscribeTokenRefresh(() => {
-            resolve(nextFetch<T>(path, options, false));
-          });
+          refreshSubscribers.push(() => resolve(nextFetch<T>(path, options, false)));
         });
       }
     }
 
     const data = await response.json();
-
-    return {
-      success: response.ok,
-      statusCode: response.status,
-      ...data,
-    };
+    return { success: response.ok, statusCode: response.status, ...data };
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === "AbortError") {
@@ -134,44 +72,34 @@ async function nextFetch<T>(
   }
 }
 
+// -- CRUD Factory --
 function createCrudMethods<T>(basePath: string) {
   return {
     getAll: (params?: Record<string, string>) => {
       const query = params ? `?${new URLSearchParams(params)}` : "";
-      return fetchWithTimeout<T[]>(`${API_URL}${basePath}${query}`);
+      return nextFetch<T[]>(`${basePath}${query}`);
     },
-    getById: (id: string) => fetchWithTimeout<T>(`${API_URL}${basePath}/${id}`),
+    getById: (id: string) => nextFetch<T>(`${basePath}/${id}`),
     create: (data: unknown) =>
-      fetchWithTimeout<T>(`${API_URL}${basePath}`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+      nextFetch<T>(basePath, { method: "POST", body: JSON.stringify(data) }),
     update: (id: string, data: unknown) =>
-      fetchWithTimeout<T>(`${API_URL}${basePath}/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      }),
+      nextFetch<T>(`${basePath}/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     delete: (id: string) =>
-      fetchWithTimeout<T>(`${API_URL}${basePath}/${id}`, { method: "DELETE" }),
+      nextFetch<T>(`${basePath}/${id}`, { method: "DELETE" }),
   };
 }
 
+// -- API --
 export const api = {
   auth: {
     login: (data: unknown) =>
-      nextFetch("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+      nextFetch("/api/auth/login", { method: "POST", body: JSON.stringify(data) }),
     register: (data: unknown) =>
-      nextFetch("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+      nextFetch("/api/auth/register", { method: "POST", body: JSON.stringify(data) }),
     logout: () => nextFetch("/api/auth/logout", { method: "GET" }),
   },
   jobs: {
-    ...createCrudMethods("/job"),
+    ...createCrudMethods(`${API_URL}/job`),
     apply: (jobId: string) =>
       nextFetch(`/api/jobs/apply/${jobId}`, { method: "POST" }),
     favorite: (jobId: string) =>
@@ -180,8 +108,14 @@ export const api = {
   applications: {
     getAll: () => nextFetch("/api/applications"),
     getById: (id: string) => nextFetch(`/api/applications/${id}`),
-    checkApplied: (jobId: string) =>
-      nextFetch(`/api/applications/applied/${jobId}`),
+    checkApplied: (jobId: string) => nextFetch(`/api/applications/applied/${jobId}`),
   },
-  companies: createCrudMethods("/company"),
+  companies: {
+    ...createCrudMethods("/api/company"),
+  },
 };
+
+// -- Session Utility --
+export async function verifySession(): Promise<boolean> {
+  return refreshToken();
+}

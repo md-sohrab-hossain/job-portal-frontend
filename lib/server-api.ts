@@ -51,13 +51,17 @@ export async function authFetch<T = unknown>(
   const setCookies = response.headers.getSetCookie();
   const uniqueCookies = [...new Set(setCookies)];
 
+  // Next.js throws an error if we try to send a body with a 204 status code.
+  // We map 204 -> 200 so we can safely return the JSON payload expected by the frontend.
+  const proxyStatus = response.status === 204 ? 200 : response.status;
+
   const nextResponse = NextResponse.json(
     {
       success: response.ok,
       statusCode: response.status,
       ...data,
     } as ApiResponse<T>,
-    { status: response.status },
+    { status: proxyStatus },
   );
 
   uniqueCookies.forEach((cookie) =>
