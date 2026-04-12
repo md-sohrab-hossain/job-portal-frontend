@@ -8,6 +8,8 @@ interface DeleteConfirmModalProps {
   onClose: () => void;
   onConfirm: () => Promise<void>;
   isDeleting: boolean;
+  title?: string;
+  description?: string;
 }
 
 export function DeleteConfirmModal({
@@ -15,6 +17,8 @@ export function DeleteConfirmModal({
   onClose,
   onConfirm,
   isDeleting,
+  title = "Delete company?",
+  description = "Are you sure you want to delete this company? This action cannot be undone.",
 }: DeleteConfirmModalProps) {
   if (!isOpen) return null;
 
@@ -29,11 +33,8 @@ export function DeleteConfirmModal({
           <div className="h-14 w-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4 border-4 border-red-100">
             <Trash2 className="h-6 w-6 text-red-500" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900">Delete company?</h2>
-          <p className="text-sm text-gray-500 mt-2">
-            Are you sure you want to delete this company? This action cannot be
-            undone.
-          </p>
+          <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+          <p className="text-sm text-gray-500 mt-2">{description}</p>
           <div className="flex gap-3 mt-6">
             <Button
               variant="outline"

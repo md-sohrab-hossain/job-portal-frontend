@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  return authFetch(`/company/${id}`, "GET", undefined, { requireAuth: true });
+  return authFetch(`/job/${id}`, "GET", undefined, { requireAuth: false });
 }
 
 export async function PATCH(
@@ -15,7 +15,7 @@ export async function PATCH(
 ) {
   const { id } = await params;
   const body = await request.json().catch(() => undefined);
-  return authFetch(`/company/${id}`, "PUT", body, { requireAuth: true });
+  return authFetch(`/job/${id}`, "PATCH", body, { requireAuth: true });
 }
 
 export async function DELETE(
@@ -23,7 +23,5 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  return authFetch(`/company/${id}`, "DELETE", undefined, {
-    requireAuth: true,
-  });
+  return authFetch(`/job/${id}`, "DELETE", undefined, { requireAuth: true });
 }

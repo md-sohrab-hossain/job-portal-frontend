@@ -1,13 +1,11 @@
-import { ApiResponse } from "@/types/api";
-import { API_URL } from "./constants";
+import type { ApiResponse } from "@/types/api";
 
-// -- Token Refresh State --
 let isRefreshing = false;
-let refreshSubscribers: (() => void)[] = [];
+let refreshQueue: Array<() => void> = [];
 
-async function refreshToken(): Promise<boolean> {
+async function refreshAccessToken(): Promise<boolean> {
   try {
-    const res = await fetch(`${API_URL}/user/refresh`, {
+    const res = await fetch("/api/auth/refresh", {
       method: "POST",
       credentials: "include",
     });
@@ -17,105 +15,106 @@ async function refreshToken(): Promise<boolean> {
   }
 }
 
-// -- Core Fetch Utility (client-side, with token refresh) --
-async function nextFetch<T>(
+async function clientFetch<T>(
   path: string,
-  options: RequestInit & { timeout?: number } = {},
-  retry = true,
+  init: RequestInit & { timeout?: number } = {},
+  _retry = true,
 ): Promise<ApiResponse<T>> {
-  const { timeout = 15000, ...fetchOptions } = options;
-
+  const { timeout = 15_000, ...options } = init;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(path, {
-      ...fetchOptions,
+    const res = await fetch(path, {
+      ...options,
       signal: controller.signal,
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(fetchOptions.headers as Record<string, string>),
+        ...(options.headers as Record<string, string>),
       },
     });
 
     clearTimeout(timeoutId);
 
-    // On 401: attempt token refresh once, then retry the original request
-    if (response.status === 401 && retry) {
+    if (res.status === 401 && _retry) {
       if (!isRefreshing) {
         isRefreshing = true;
-        const refreshed = await refreshToken();
+        const ok = await refreshAccessToken();
         isRefreshing = false;
 
-        if (refreshed) {
-          refreshSubscribers.forEach((cb) => cb());
-          refreshSubscribers = [];
-          return nextFetch<T>(path, options, false);
+        if (ok) {
+          refreshQueue.forEach((cb) => cb());
+          refreshQueue = [];
+
+          return clientFetch<T>(path, init, false);
         }
       } else {
-        // Another request is already refreshing — queue up and wait
         return new Promise((resolve) => {
-          refreshSubscribers.push(() => resolve(nextFetch<T>(path, options, false)));
+          refreshQueue.push(() => resolve(clientFetch<T>(path, init, false)));
         });
       }
     }
 
-    const data = await response.json();
-    return { success: response.ok, statusCode: response.status, ...data };
-  } catch (error) {
+    const data = await res.json();
+    return { success: res.ok, statusCode: res.status, ...data };
+  } catch (err) {
     clearTimeout(timeoutId);
-    if (error instanceof Error && error.name === "AbortError") {
-      return { success: false, statusCode: 408, error: "Request timeout" };
+    if (err instanceof Error && err.name === "AbortError") {
+      return { success: false, statusCode: 408, error: "Request timed out" };
     }
     return { success: false, statusCode: 500, error: "Network error" };
   }
 }
 
-// -- CRUD Factory --
+const post = (path: string, body?: unknown) =>
+  clientFetch(path, {
+    method: "POST",
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+
 function createCrudMethods<T>(basePath: string) {
   return {
     getAll: (params?: Record<string, string>) => {
-      const query = params ? `?${new URLSearchParams(params)}` : "";
-      return nextFetch<T[]>(`${basePath}${query}`);
+      const qs = params ? `?${new URLSearchParams(params)}` : "";
+      return clientFetch<T[]>(`${basePath}${qs}`);
     },
-    getById: (id: string) => nextFetch<T>(`${basePath}/${id}`),
-    create: (data: unknown) =>
-      nextFetch<T>(basePath, { method: "POST", body: JSON.stringify(data) }),
-    update: (id: string, data: unknown) =>
-      nextFetch<T>(`${basePath}/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    getById: (id: string) => clientFetch<T>(`${basePath}/${id}`),
+    create: (body: unknown) =>
+      clientFetch<T>(basePath, { method: "POST", body: JSON.stringify(body) }),
+    update: (id: string, body: unknown) =>
+      clientFetch<T>(`${basePath}/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      }),
     delete: (id: string) =>
-      nextFetch<T>(`${basePath}/${id}`, { method: "DELETE" }),
+      clientFetch<T>(`${basePath}/${id}`, { method: "DELETE" }),
   };
 }
 
-// -- API --
 export const api = {
   auth: {
-    login: (data: unknown) =>
-      nextFetch("/api/auth/login", { method: "POST", body: JSON.stringify(data) }),
-    register: (data: unknown) =>
-      nextFetch("/api/auth/register", { method: "POST", body: JSON.stringify(data) }),
-    logout: () => nextFetch("/api/auth/logout", { method: "GET" }),
+    login: (body: unknown) => post("/api/auth/login", body),
+    register: (body: unknown) => post("/api/auth/register", body),
+    logout: () => clientFetch("/api/auth/logout"),
   },
+
   jobs: {
-    ...createCrudMethods(`${API_URL}/job`),
-    apply: (jobId: string) =>
-      nextFetch(`/api/jobs/apply/${jobId}`, { method: "POST" }),
-    favorite: (jobId: string) =>
-      nextFetch(`/api/jobs/favorite/${jobId}`, { method: "POST" }),
+    ...createCrudMethods("/api/jobs"),
+    adminList: () => clientFetch("/api/jobs/admin"),
+    apply: (id: string) => post(`/api/jobs/apply/${id}`),
+    favorite: (id: string) => post(`/api/jobs/favorite/${id}`),
   },
+
+  companies: createCrudMethods("/api/company"),
+
   applications: {
-    getAll: () => nextFetch("/api/applications"),
-    getById: (id: string) => nextFetch(`/api/applications/${id}`),
-    checkApplied: (jobId: string) => nextFetch(`/api/applications/applied/${jobId}`),
-  },
-  companies: {
-    ...createCrudMethods("/api/company"),
+    ...createCrudMethods("/api/applications"),
+    checkApplied: (jobId: string) =>
+      clientFetch(`/api/applications/applied/${jobId}`),
   },
 };
 
-// -- Session Utility --
 export async function verifySession(): Promise<boolean> {
-  return refreshToken();
+  return refreshAccessToken();
 }

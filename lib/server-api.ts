@@ -51,8 +51,6 @@ export async function authFetch<T = unknown>(
   const setCookies = response.headers.getSetCookie();
   const uniqueCookies = [...new Set(setCookies)];
 
-  // Next.js throws an error if we try to send a body with a 204 status code.
-  // We map 204 -> 200 so we can safely return the JSON payload expected by the frontend.
   const proxyStatus = response.status === 204 ? 200 : response.status;
 
   const nextResponse = NextResponse.json(
@@ -69,4 +67,25 @@ export async function authFetch<T = unknown>(
   );
 
   return nextResponse;
+}
+
+export async function publicFetch<T>(
+  path: string,
+  options?: { revalidate?: number },
+): Promise<{ data: T | null; error: string | null }> {
+  try {
+    const res = await fetch(`${API_URL}${path}`, {
+      headers: { "Content-Type": "application/json" },
+      next: { revalidate: options?.revalidate ?? 60 },
+    });
+
+    if (!res.ok) {
+      return { data: null, error: `Request failed: ${res.status}` };
+    }
+
+    const json = await res.json();
+    return { data: (json.data ?? json) as T, error: null };
+  } catch {
+    return { data: null, error: "Network error" };
+  }
 }

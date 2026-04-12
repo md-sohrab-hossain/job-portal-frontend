@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Plus, Search, Building2, Loader2, AlertCircle } from "lucide-react";
+import { Plus, Search, Briefcase, Loader2, AlertCircle } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import {
@@ -11,37 +11,39 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { useJobs } from "@/hooks/useJobs";
 import { useCompanies } from "@/hooks/useCompanies";
-import { type Company, type CompanyFormData } from "@/types/company";
-import { CompanyRow } from "./CompanyRow";
-import { CompanyFormModal } from "./CompanyFormModal";
-import { DeleteConfirmModal } from "./DeleteConfirmModal";
+import { type Job } from "@/types/job";
+import { type JobInput } from "@/lib/schemas/job";
+import { JobRow } from "./JobRow";
+import { JobFormModal } from "./JobFormModal";
+import { DeleteConfirmModal } from "../companies/DeleteConfirmModal"; // Reuse deletion modal
 
-const EMPTY_FORM: CompanyFormData = {
-  name: "",
+const EMPTY_FORM: JobInput = {
+  title: "",
   description: "",
-  website: "",
+  requirements: "",
+  salary: 0,
   location: "",
-  logo: "",
+  jobType: "Full-time",
+  experienceLevel: "Junior",
+  position: 1,
+  companyId: "",
 };
 
-export default function CompaniesTable() {
-  const {
-    companies,
-    loading,
-    error,
-    refresh,
-    addCompany,
-    updateCompany,
-    deleteCompany,
-  } = useCompanies();
+export function JobsTable() {
+  const { jobs, loading, error, refresh, addJob, updateJob, deleteJob } =
+    useJobs();
+
+  // Need companies list for the job form
+  const { companies } = useCompanies();
 
   const [search, setSearch] = useState("");
 
   // Modal states
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<CompanyFormData>(EMPTY_FORM);
+  const [formData, setFormData] = useState<JobInput>(EMPTY_FORM);
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -64,40 +66,46 @@ export default function CompaniesTable() {
     setShowForm(true);
   };
 
-  const openEdit = (company: Company) => {
+  const openEdit = (job: Job) => {
     setFormData({
-      name: company.name,
-      description: company.description,
-      website: company.website,
-      location: company.location,
-      logo: company.logo,
+      title: job.title,
+      description: job.description,
+      requirements: job.requirements?.join(", ") || "",
+      salary: job.salary,
+      location: job.location || "",
+      jobType: job.jobType,
+      experienceLevel: job.experienceLevel || "Junior",
+      position: job.position,
+      companyId: job.company?.id || "",
     });
-    setEditingId(company.id);
+    setEditingId(job.id);
     setShowForm(true);
   };
 
-  const handleFormSubmit = async (data: CompanyFormData) => {
+  const handleFormSubmit = async (data: JobInput) => {
     if (editingId) {
-      return await updateCompany(editingId, data);
+      return await updateJob(editingId, data);
     } else {
-      return await addCompany(data);
+      return await addJob(data);
     }
   };
 
   const handleDeleteConfirm = async () => {
     if (!deleteId) return;
     setIsDeleting(true);
-    await deleteCompany(deleteId);
+    await deleteJob(deleteId);
     setDeleteId(null);
     setIsDeleting(false);
   };
 
   const filtered = useMemo(
     () =>
-      companies.filter((c) =>
-        c.name.toLowerCase().includes(search.toLowerCase()),
+      jobs.filter(
+        (j) =>
+          j.title.toLowerCase().includes(search.toLowerCase()) ||
+          j.company?.name.toLowerCase().includes(search.toLowerCase()),
       ),
-    [companies, search],
+    [jobs, search],
   );
 
   return (
@@ -106,9 +114,11 @@ export default function CompaniesTable() {
         {/* Header Area */}
         <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between bg-white">
           <div className="w-full sm:w-auto flex-1">
-            <h1 className="text-xl font-bold text-gray-900 mb-1">Companies</h1>
+            <h1 className="text-xl font-bold text-gray-900 mb-1">
+              Job Postings
+            </h1>
             <p className="text-sm text-gray-500">
-              Manage your company directory and details
+              Manage your job listings and track positions
             </p>
           </div>
 
@@ -117,7 +127,7 @@ export default function CompaniesTable() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               <Input
                 className="pl-9 bg-gray-50/50 min-w-60"
-                placeholder="Search companies…"
+                placeholder="Search jobs or companies…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -126,7 +136,7 @@ export default function CompaniesTable() {
               onClick={openCreate}
               className="bg-amber-400 hover:bg-amber-500 text-black font-medium gap-2 shrink-0"
             >
-              <Plus className="h-4 w-4" /> Add Company
+              <Plus className="h-4 w-4" /> Post Job
             </Button>
           </div>
         </div>
@@ -152,16 +162,16 @@ export default function CompaniesTable() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-20 m-6 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50">
-              <Building2 className="h-12 w-12 text-gray-300 mx-auto" />
+              <Briefcase className="h-12 w-12 text-gray-300 mx-auto" />
               <p className="mt-3 text-gray-600 font-medium">
                 {search
-                  ? `No results for "${search}"`
-                  : "No companies added yet"}
+                  ? `No jobs found for "${search}"`
+                  : "No jobs posted yet"}
               </p>
               <p className="text-sm text-gray-400 mt-1 max-w-sm mx-auto">
                 {search
-                  ? "Try adjusting your search terms."
-                  : "Get started by adding your first company to the directory."}
+                  ? "Try checking your search terms."
+                  : "Start by posting your first job to attract quality candidates."}
               </p>
               {!search && (
                 <Button
@@ -169,7 +179,7 @@ export default function CompaniesTable() {
                   variant="outline"
                   className="mt-5 text-gray-600 hover:text-gray-900 border-gray-300 bg-white"
                 >
-                  Add your first company
+                  Post your first job
                 </Button>
               )}
             </div>
@@ -177,17 +187,17 @@ export default function CompaniesTable() {
             <Table>
               <TableHeader className="bg-gray-50 border-b border-gray-100">
                 <TableRow className="hover:bg-gray-50">
-                  <TableHead className="w-20 text-center font-semibold text-gray-600">
-                    Logo
-                  </TableHead>
                   <TableHead className="font-semibold text-gray-600">
-                    Company Details
+                    Job & Company
                   </TableHead>
                   <TableHead className="font-semibold text-gray-600 hidden md:table-cell">
-                    Contact & Links
+                    Type & Positions
                   </TableHead>
                   <TableHead className="font-semibold text-gray-600 hidden lg:table-cell">
-                    Date
+                    Location & Salary
+                  </TableHead>
+                  <TableHead className="font-semibold text-gray-600 hidden xl:table-cell">
+                    Level
                   </TableHead>
                   <TableHead className="font-semibold text-gray-600 text-right pr-6">
                     Actions
@@ -195,10 +205,10 @@ export default function CompaniesTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((company) => (
-                  <CompanyRow
-                    key={company.id}
-                    company={company}
+                {filtered.map((job) => (
+                  <JobRow
+                    key={job.id}
+                    job={job}
                     onEdit={openEdit}
                     onDelete={setDeleteId}
                   />
@@ -210,12 +220,14 @@ export default function CompaniesTable() {
       </div>
 
       {/* Modals */}
-      <CompanyFormModal
+      <JobFormModal
+        key={showForm ? editingId || "create" : "closed"}
         isOpen={showForm}
         onClose={() => setShowForm(false)}
         initialData={formData}
         isEditing={!!editingId}
         onSubmit={handleFormSubmit}
+        companies={companies}
       />
 
       <DeleteConfirmModal
@@ -223,6 +235,8 @@ export default function CompaniesTable() {
         onClose={() => setDeleteId(null)}
         onConfirm={handleDeleteConfirm}
         isDeleting={isDeleting}
+        title="Delete Job Post?"
+        description="Are you sure you want to delete this job post? Applications associated with it may also be lost. This cannot be undone."
       />
     </div>
   );

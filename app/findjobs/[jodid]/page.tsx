@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { api } from "@/lib/api";
-import { JobDetail } from "@/types/job";
+import { publicFetch } from "@/lib/server-api";
+import type { JobDetail } from "@/types/job";
 import { JobDetails } from "@/components/jobs";
 
 export default async function JobDetailsPage({
@@ -9,15 +9,15 @@ export default async function JobDetailsPage({
   params: Promise<{ jodid: string }>;
 }) {
   const { jodid: jobId } = await params;
-  const response = await api.jobs.getById(jobId);
+  const { data, error } = await publicFetch<JobDetail>(`/job/${jobId}`);
 
-  if (!response.success || !response.data) {
+  if (error || !data) {
     notFound();
   }
 
   return (
     <div className="max-w-3xl mx-auto my-10 px-4">
-      <JobDetails job={response.data as JobDetail} jobId={jobId} />
+      <JobDetails job={data} jobId={jobId} />
     </div>
   );
 }

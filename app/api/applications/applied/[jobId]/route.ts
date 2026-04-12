@@ -1,26 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { API_URL } from "@/lib/constants";
+import { authFetch } from "@/lib/server-api";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ jobId: string }> }) {
   try {
     const { jobId } = await params;
-    const accessToken = req.cookies.get("accessToken")?.value;
 
-    if (!accessToken) {
-      return NextResponse.json(
-        { success: false, statusCode: 401, error: "Unauthorized" },
-        { status: 401 }
-      );
+    const response = await authFetch("/applications", "GET", undefined, { requireAuth: true });
+    
+    if (!response.ok) {
+      return response;
     }
-
-    const response = await fetch(`${API_URL}/applications`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
 
     const data = await response.json();
     
@@ -30,7 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ jobI
     
     return NextResponse.json(
       { success: true, data: hasApplied },
-      { status: response.status }
+      { status: 200 }
     );
   } catch {
     return NextResponse.json(
@@ -39,3 +28,4 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ jobI
     );
   }
 }
+

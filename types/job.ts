@@ -1,9 +1,4 @@
-export interface Company {
-  name: string;
-  logo?: string;
-  website?: string;
-  description?: string;
-}
+import { type Company } from "@/types/company";
 
 export interface Job {
   id: string;
@@ -16,19 +11,20 @@ export interface Job {
   createdAt?: string;
   location?: string;
   requirements?: string[];
-  experienceLevel?: number;
+  experienceLevel?: string;
   applications?: Application[];
 }
 
 export interface Application {
-  applicantId: string | number;
+  id: string;
+  applicantId: string;
   appliedAt?: string;
 }
 
-export interface JobDetail extends Omit<Job, "company"> {
+export interface JobDetail extends Omit<Job, "company" | "applications"> {
   location: string;
   requirements: string[];
-  experienceLevel: number;
+  experienceLevel: string;
   applications: Application[];
   createdAt: string;
   company: Company;
@@ -49,11 +45,11 @@ export interface JobResponse {
 export interface JobFormData {
   title: string;
   description: string;
-  requirements: string;
+  requirements: string; // Comma-separated string in form
   salary: number;
   location: string;
   jobType: string;
-  experienceLevel: number;
+  experienceLevel: string;
   position: number;
   companyId: string;
 }

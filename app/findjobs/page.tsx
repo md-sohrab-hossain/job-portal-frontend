@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { FilterJobs, SearchBar, JobResultsHeader, JobContent, MobileFilters } from "@/components/jobs";
-import { API_URL } from "@/lib/constants";
 import type { Job as JobType } from "@/types/job";
 import { useSearchParams, useRouter } from "next/navigation";
+import { api } from "@/lib/api";
 
 interface SearchParams {
   keyword?: string;
@@ -12,24 +12,6 @@ interface SearchParams {
   jobType?: string;
   salary?: string;
 }
-
-const extractJobs = (data: unknown): JobType[] => {
-  if (!data || typeof data !== "object") return [];
-  
-  const response = data as Record<string, unknown>;
-  
-  if (Array.isArray(response.data)) {
-    return response.data;
-  }
-  if (Array.isArray((response.data as Record<string, unknown>)?.jobs)) {
-    return (response.data as Record<string, unknown>).jobs as JobType[];
-  }
-  if (Array.isArray(response.jobs)) {
-    return response.jobs;
-  }
-  
-  return [];
-};
 
 export default function FindJobs() {
   const searchParams = useSearchParams();
@@ -53,25 +35,16 @@ export default function FindJobs() {
     setError(null);
 
     try {
-      const queryParams = new URLSearchParams();
-      if (params.keyword) queryParams.set("keyword", params.keyword);
-      if (params.location) queryParams.set("location", params.location);
-      if (params.jobType) queryParams.set("jobType", params.jobType);
-      if (params.salary) queryParams.set("salary", params.salary);
+      const cleanParams: Record<string, string> = {};
+      if (params.keyword) cleanParams.keyword = params.keyword;
+      if (params.location) cleanParams.location = params.location;
+      if (params.jobType) cleanParams.jobType = params.jobType;
+      if (params.salary) cleanParams.salary = params.salary;
 
-      const queryString = queryParams.toString();
-      const url = `${API_URL}/job${queryString ? `?${queryString}` : ""}`;
+      const data = await api.jobs.getAll(cleanParams);
 
-      const response = await fetch(url, {
-        cache: "no-cache",
-        credentials: "include",
-      });
-
-      const data = await response.json();
-      const extractedJobs = extractJobs(data);
-
-      if (data.success) {
-        setJobs(extractedJobs);
+      if (data.success && data.data) {
+        setJobs(data.data as unknown as JobType[]);
       } else {
         setError(data.message || data.error || "Failed to fetch jobs");
         setJobs([]);
@@ -94,27 +67,17 @@ export default function FindJobs() {
       setError(null);
 
       try {
-        const queryParams = new URLSearchParams();
-        if (currentParams.keyword) queryParams.set("keyword", currentParams.keyword);
-        if (currentParams.location) queryParams.set("location", currentParams.location);
-        if (currentParams.jobType) queryParams.set("jobType", currentParams.jobType);
-        if (currentParams.salary) queryParams.set("salary", currentParams.salary);
+        const cleanParams: Record<string, string> = {};
+        if (currentParams.keyword) cleanParams.keyword = currentParams.keyword;
+        if (currentParams.location) cleanParams.location = currentParams.location;
+        if (currentParams.jobType) cleanParams.jobType = currentParams.jobType;
+        if (currentParams.salary) cleanParams.salary = currentParams.salary;
 
-        const queryString = queryParams.toString();
-        const url = `${API_URL}/job${queryString ? `?${queryString}` : ""}`;
-
-        const response = await fetch(url, {
-          cache: "no-cache",
-          credentials: "include",
-        });
-
-        const data = await response.json();
+        const data = await api.jobs.getAll(cleanParams);
         if (!mounted) return;
 
-        const extractedJobs = extractJobs(data);
-
-        if (data.success) {
-          setJobs(extractedJobs);
+        if (data.success && data.data) {
+          setJobs(data.data as unknown as JobType[]);
         } else {
           setError(data.message || data.error || "Failed to fetch jobs");
           setJobs([]);
