@@ -1,7 +1,7 @@
 import type { ApiResponse } from "@/types/api";
 
 let isRefreshing = false;
-let refreshQueue: Array<() => void> = [];
+let refreshQueue: Array<(success: boolean) => void> = [];
 
 async function refreshAccessToken(): Promise<boolean> {
   try {
@@ -44,14 +44,23 @@ async function clientFetch<T>(
         isRefreshing = false;
 
         if (ok) {
-          refreshQueue.forEach((cb) => cb());
+          refreshQueue.forEach((cb) => cb(true));
           refreshQueue = [];
 
           return clientFetch<T>(path, init, false);
+        } else {
+          refreshQueue.forEach((cb) => cb(false));
+          refreshQueue = [];
         }
       } else {
-        return new Promise((resolve) => {
-          refreshQueue.push(() => resolve(clientFetch<T>(path, init, false)));
+        return new Promise((resolve, reject) => {
+          refreshQueue.push((success: boolean) => {
+            if (success) {
+              resolve(clientFetch<T>(path, init, false));
+            } else {
+              reject(new Error("Refresh failed"));
+            }
+          });
         });
       }
     }
