@@ -1,11 +1,12 @@
 import type { ApiResponse } from "@/types/api";
+import { Endpoints } from "./api-endpoints";
 
 let isRefreshing = false;
 let refreshQueue: Array<(success: boolean) => void> = [];
 
 async function refreshAccessToken(): Promise<boolean> {
   try {
-    const res = await fetch("/api/auth/refresh", {
+    const res = await fetch(Endpoints.auth.refresh, {
       method: "POST",
       credentials: "include",
     });
@@ -103,24 +104,35 @@ function createCrudMethods<T>(basePath: string) {
 
 export const api = {
   auth: {
-    login: (body: unknown) => post("/api/auth/login", body),
-    register: (body: unknown) => post("/api/auth/register", body),
-    logout: () => clientFetch("/api/auth/logout"),
+    login: (body: unknown) => post(Endpoints.auth.login, body),
+    register: (body: unknown) => post(Endpoints.auth.register, body),
+    logout: () => clientFetch(Endpoints.auth.logout),
   },
 
   jobs: {
-    ...createCrudMethods("/api/jobs"),
-    adminList: () => clientFetch("/api/jobs/admin"),
-    apply: (id: string) => post(`/api/jobs/apply/${id}`),
-    favorite: (id: string) => post(`/api/jobs/favorite/${id}`),
+    ...createCrudMethods(Endpoints.jobs.base),
+    adminList: () => clientFetch(Endpoints.jobs.admin),
+    apply: (id: string) => post(Endpoints.jobs.apply(id)),
+    favorite: (id: string) => post(Endpoints.jobs.favorite(id)),
   },
 
-  companies: createCrudMethods("/api/company"),
+  companies: createCrudMethods(Endpoints.companies.base),
 
   applications: {
-    ...createCrudMethods("/api/applications"),
+    ...createCrudMethods(Endpoints.applications.base),
     checkApplied: (jobId: string) =>
-      clientFetch(`/api/applications/applied/${jobId}`),
+      clientFetch(Endpoints.applications.applied(jobId)),
+    getApplicants: (jobId: string) =>
+      clientFetch(Endpoints.applications.applicants(jobId)),
+    updateStatus: (applicationId: string, status: string) =>
+      clientFetch(Endpoints.applications.updateStatus(applicationId), {
+        method: "PUT",
+        body: JSON.stringify({ status: status.toLowerCase() }),
+      }),
+  },
+
+  user: {
+    getById: (id: string) => clientFetch(Endpoints.user.byId(id)),
   },
 };
 

@@ -15,11 +15,28 @@ export interface Job {
   applications?: Application[];
 }
 
+export interface Applicant {
+  id: string;
+  fullname: string;
+  email: string;
+  phoneNumber?: string;
+  profilePhoto?: string;
+  resume?: string;
+  resumeOriginalName?: string;
+  bio?: string;
+  skills?: string[];
+}
+
 export interface Application {
   id: string;
   applicantId: string;
-  appliedAt?: string;
+  jobId: string;
+  status: "pending" | "accepted" | "rejected";
+  createdAt: string;
+  updatedAt: string;
+  applicant?: Applicant;
 }
+
 
 export interface JobDetail extends Omit<Job, "company" | "applications"> {
   location: string;

@@ -11,11 +11,13 @@ export const ROUTES = {
     HOME: "/",
     COMPANIES: "/dashboard/companies",
     JOBS: "/dashboard/jobs",
+    APPLICANTS: (jobId: string) => `/dashboard/jobs/${jobId}`,
   },
 
   QUERY_PARAMS: {
     KEYWORD: "keyword",
     CATEGORY: "category",
+    JOB_ID: "jobId",
   },
 } as const;
 

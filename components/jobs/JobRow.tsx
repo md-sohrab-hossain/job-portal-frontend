@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { TableCell, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
 import {
@@ -8,8 +10,11 @@ import {
   MapPin,
   Briefcase,
   Users,
+  User,
   DollarSign,
+  Eye,
 } from "lucide-react";
+
 import { type Job } from "@/types/job";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
@@ -21,6 +26,7 @@ interface JobRowProps {
 }
 
 export function JobRow({ job, onEdit, onDelete }: JobRowProps) {
+  const router = useRouter();
   return (
     <TableRow className="hover:bg-amber-50/30 transition-colors group">
       <TableCell className="align-top pt-5">
@@ -77,6 +83,64 @@ export function JobRow({ job, onEdit, onDelete }: JobRowProps) {
         >
           {job.experienceLevel}
         </Badge>
+      </TableCell>
+
+      <TableCell className="align-top pt-5">
+        <button
+          onClick={() => router.push(`/dashboard/jobs/${job.id}`)}
+          className="group/applicants flex items-center gap-3 hover:bg-amber-50 p-2 rounded-xl transition-all border border-transparent hover:border-amber-200 cursor-pointer w-full text-left"
+          title="View Applicants"
+        >
+          <div className="flex -space-x-2.5">
+            {job.applications && job.applications.length > 0 ? (
+              job.applications.slice(0, 3).map((app) => (
+                <div
+                  key={app.id}
+                  className="h-8 w-8 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center overflow-hidden shadow-sm ring-1 ring-gray-100"
+                >
+                  {app.applicant?.profilePhoto ? (
+                    <Image
+                      src={app.applicant.profilePhoto}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      width={32}
+                      height={32}
+                    />
+                  ) : (
+                    <User className="h-4 w-4 text-gray-400" />
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="h-8 w-8 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center shadow-sm ring-1 ring-gray-100 font-bold text-gray-300">
+                <Users className="h-4 w-4" />
+              </div>
+            )}
+            {job.applications && job.applications.length > 3 && (
+              <div className="h-8 w-8 rounded-full border-2 border-white bg-amber-100 flex items-center justify-center text-[10px] font-bold text-amber-700 shadow-sm z-10 ring-1 ring-amber-200">
+                +{job.applications.length - 3}
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-bold text-gray-900 leading-none">
+                {job.applications?.length || 0}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-md">
+                Applied
+              </span>
+            </div>
+            <span className="text-[10px] text-gray-400 font-medium mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
+              Manage candidates
+            </span>
+          </div>
+
+          <div className="opacity-0 group-hover/applicants:opacity-100 transition-all transform translate-x-2 group-hover/applicants:translate-x-0 bg-amber-100/50 p-2 rounded-lg border border-amber-200/50">
+            <Eye className="h-4 w-4 text-amber-600" />
+          </div>
+        </button>
       </TableCell>
 
       <TableCell className="align-top pt-4 pr-6">

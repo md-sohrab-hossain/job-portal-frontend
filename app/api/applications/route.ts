@@ -1,6 +1,5 @@
-import { NextRequest } from "next/server";
 import { authFetch } from "@/lib/server-api";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   return authFetch("/applications", "GET", undefined, { requireAuth: true });
 }

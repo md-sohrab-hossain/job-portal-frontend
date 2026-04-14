@@ -17,7 +17,7 @@ import { type Job } from "@/types/job";
 import { type JobInput } from "@/lib/schemas/job";
 import { JobRow } from "./JobRow";
 import { JobFormModal } from "./JobFormModal";
-import { DeleteConfirmModal } from "../companies/DeleteConfirmModal"; // Reuse deletion modal
+import { DeleteConfirmModal } from "../companies/DeleteConfirmModal";
 
 const EMPTY_FORM: JobInput = {
   title: "",
@@ -198,6 +198,9 @@ export function JobsTable() {
                   </TableHead>
                   <TableHead className="font-semibold text-gray-600 hidden xl:table-cell">
                     Level
+                  </TableHead>
+                  <TableHead className="font-semibold text-gray-600">
+                    Applicants
                   </TableHead>
                   <TableHead className="font-semibold text-gray-600 text-right pr-6">
                     Actions
