@@ -133,6 +133,12 @@ export const api = {
 
   user: {
     getById: (id: string) => clientFetch(Endpoints.user.byId(id)),
+    getMe: () => clientFetch(Endpoints.user.me),
+    update: (id: string, body: unknown) =>
+      clientFetch(Endpoints.user.update, {
+        method: "PUT",
+        body: JSON.stringify(body),
+      }),
   },
 };
 

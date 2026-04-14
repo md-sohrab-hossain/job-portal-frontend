@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
 import { authFetch } from "@/lib/server-api";
+import { BackendEndpoints } from "@/lib/api-endpoints";
 
-export async function GET({ params }: { params: Promise<{ jobId: string }> }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ jobId: string }> },
+) {
   try {
     const { jobId } = await params;
 
-    const response = await authFetch("/applications", "GET", undefined, {
-      requireAuth: true,
-    });
+    const response = await authFetch(
+      BackendEndpoints.applications.base,
+      "GET",
+      undefined,
+      {
+        requireAuth: true,
+      },
+    );
 
     if (!response.ok) {
       return response;

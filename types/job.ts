@@ -35,7 +35,9 @@ export interface Application {
   createdAt: string;
   updatedAt: string;
   applicant?: Applicant;
+  job?: Job;
 }
+
 
 
 export interface JobDetail extends Omit<Job, "company" | "applications"> {

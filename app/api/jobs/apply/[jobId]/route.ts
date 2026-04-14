@@ -1,9 +1,13 @@
+import { NextRequest } from "next/server";
+import { BackendEndpoints } from "@/lib/api-endpoints";
 import { authFetch } from "@/lib/server-api";
 
 export async function POST(
-  request: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ jobId: string }> },
 ) {
   const { jobId } = await params;
-  return authFetch(`/applications/${jobId}`, "POST", undefined, { requireAuth: true });
+  return authFetch(BackendEndpoints.jobs.apply(jobId), "POST", undefined, {
+    requireAuth: true,
+  });
 }

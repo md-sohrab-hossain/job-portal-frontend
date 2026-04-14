@@ -4,6 +4,7 @@ import { registerSchema } from "@/lib/schemas/register";
 import { ValidationError } from "@/lib/errors";
 import { handleError } from "@/lib/error-handler";
 import { API_URL } from "@/lib/constants";
+import { BackendEndpoints } from "@/lib/api-endpoints";
 
 type AuthSchema = typeof loginSchema | typeof registerSchema;
 
@@ -52,10 +53,9 @@ async function authHandler(
 }
 
 export function loginHandler(request: Request) {
-  return authHandler(request, "/user/login", loginSchema);
+  return authHandler(request, BackendEndpoints.auth.login, loginSchema);
 }
 
 export function registerHandler(request: Request) {
-  return authHandler(request, "/user/register", registerSchema);
+  return authHandler(request, BackendEndpoints.auth.register, registerSchema);
 }
-

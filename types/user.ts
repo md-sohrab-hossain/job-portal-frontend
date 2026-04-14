@@ -2,7 +2,17 @@ export type Role = "recruiter" | "student";
 
 export interface User {
   id: string;
+  _id?: string;
+  fullname: string;
+  email: string;
   role: Role;
+  phoneNumber?: string;
+  profileBio?: string;
+  profileSkills?: string[];
+  profilePhoto?: string;
+  resume?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface UserData {
@@ -15,6 +25,7 @@ export interface AuthUser {
   email: string;
   role: Role;
 }
+
 
 export interface StoredUserData {
   role?: Role;
