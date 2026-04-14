@@ -12,7 +12,7 @@ const BACKEND_ROUTES = {
     base: "/job",
     admin: "/job/admin",
     byId: (id: string) => `/job/${id}`,
-    apply: (id: string) => `/applications/${id}`, // Backend handles apply via applications controller
+    favorites: "/job/favorites",
     favorite: (id: string) => `/job/favorite/${id}`,
   },
   companies: {
@@ -21,6 +21,7 @@ const BACKEND_ROUTES = {
   },
   applications: {
     base: "/applications",
+    apply: (id: string) => `/applications/${id}`,
     applied: (jobId: string) => `/applications/applied/${jobId}`,
     applicants: (jobId: string) => `/applications/${jobId}/applicants`,
     updateStatus: (id: string) => `/applications/update-status/${id}`,
@@ -44,7 +45,7 @@ export const Endpoints = {
     base: `${API_BASE}/jobs`,
     admin: `${API_BASE}/jobs/admin`,
     byId: (id: string) => `${API_BASE}/jobs/${id}`,
-    apply: (id: string) => `${API_BASE}/jobs/apply/${id}`,
+    favorites: `${API_BASE}/jobs/favorites`,
     favorite: (id: string) => `${API_BASE}/jobs/favorite/${id}`,
   },
   companies: {
@@ -53,6 +54,7 @@ export const Endpoints = {
   },
   applications: {
     base: `${API_BASE}/applications`,
+    apply: (id: string) => `${API_BASE}/applications/apply/${id}`,
     applied: (jobId: string) => `${API_BASE}/applications/applied/${jobId}`,
     applicants: (jobId: string) =>
       `${API_BASE}/applications/${jobId}/applicants`,

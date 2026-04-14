@@ -112,7 +112,7 @@ export const api = {
   jobs: {
     ...createCrudMethods(Endpoints.jobs.base),
     adminList: () => clientFetch(Endpoints.jobs.admin),
-    apply: (id: string) => post(Endpoints.jobs.apply(id)),
+    getFavorites: () => clientFetch(Endpoints.jobs.favorites),
     favorite: (id: string) => post(Endpoints.jobs.favorite(id)),
   },
 
@@ -120,6 +120,7 @@ export const api = {
 
   applications: {
     ...createCrudMethods(Endpoints.applications.base),
+    apply: (id: string) => post(Endpoints.applications.apply(id)),
     checkApplied: (jobId: string) =>
       clientFetch(Endpoints.applications.applied(jobId)),
     getApplicants: (jobId: string) =>

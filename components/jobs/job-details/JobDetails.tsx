@@ -39,7 +39,7 @@ export default function JobDetails({ job, jobId }: JobDetailsProps) {
     }
     setIsLoading(true);
     try {
-      const response = await api.jobs.apply(jobId);
+      const response = await api.applications.apply(jobId);
       if (response.success) {
         toast.success(response.message || "Applied successfully");
         setIsApplied(true);
