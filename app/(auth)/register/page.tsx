@@ -7,6 +7,7 @@ import { RegisterInput } from "@/lib/schemas/register";
 import RegisterForm from "@/components/auth/RegisterForm";
 import { handleFileUpload } from "@/lib/helpers/register";
 import { api } from "@/lib/api";
+import { ROUTES } from "@/lib/routes";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function RegisterPage() {
       }
 
       toast.success("Registration successful! Please login.");
-      router.push("/login");
+      router.push(ROUTES.LOGIN);
     } catch {
       toast.error("Something went wrong");
     }

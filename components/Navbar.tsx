@@ -80,8 +80,8 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <NavLink href="/login" label="Login" />
-              <NavLink href="/register" label="Signup" />
+              <NavLink href={ROUTES.LOGIN} label="Login" />
+              <NavLink href={ROUTES.REGISTER} label="Signup" />
             </>
           )}
         </ul>

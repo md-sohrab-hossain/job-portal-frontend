@@ -113,7 +113,7 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
   };
 
   const handleViewDetails = () => {
-    router.push(`/findjobs/${job.id}`);
+    router.push(ROUTES.JOB_DETAILS(job.id));
   };
 
   const isRemote = job.jobType?.toLowerCase() === "remote";

@@ -18,6 +18,7 @@ import {
 import { type Job } from "@/types/job";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
+import { ROUTES } from "@/lib/routes";
 
 interface JobRowProps {
   job: Job;
@@ -87,7 +88,7 @@ export function JobRow({ job, onEdit, onDelete }: JobRowProps) {
 
       <TableCell className="align-top pt-5">
         <button
-          onClick={() => router.push(`/dashboard/jobs/${job.id}`)}
+          onClick={() => router.push(ROUTES.ADMIN.APPLICANTS(job.id))}
           className="group/applicants flex items-center gap-3 hover:bg-amber-50 p-2 rounded-xl transition-all border border-transparent hover:border-amber-200 cursor-pointer w-full text-left"
           title="View Applicants"
         >

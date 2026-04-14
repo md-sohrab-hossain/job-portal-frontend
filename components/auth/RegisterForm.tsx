@@ -15,6 +15,7 @@ import {
 } from "@/config/registerFormConfig";
 import { registerSchema, RegisterInput } from "@/lib/schemas/register";
 import Link from "next/link";
+import { ROUTES } from "@/lib/routes";
 
 interface RegisterFormProps {
   onSubmit: (data: RegisterInput) => Promise<void>;
@@ -141,7 +142,7 @@ const RegisterForm = ({
 
       <p className="text-center text-sm text-gray-600">
         Already have an account?{" "}
-        <Link href="/login" className="text-yellow-500 hover:underline">
+        <Link href={ROUTES.LOGIN} className="text-yellow-500 hover:underline">
           Login
         </Link>
       </p>

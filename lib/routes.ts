@@ -12,6 +12,11 @@ export const ROUTES = {
     COMPANIES: "/dashboard/companies",
     JOBS: "/dashboard/jobs",
     APPLICANTS: (jobId: string) => `/dashboard/jobs/${jobId}`,
+    APPLICANT_PROFILE: (applicantId: string, jobId?: string) => {
+      const params = new URLSearchParams();
+      if (jobId) params.set("jobId", jobId);
+      return `/dashboard/applicants/${applicantId}${params.toString() ? `?${params}` : ""}`;
+    },
   },
 
   QUERY_PARAMS: {

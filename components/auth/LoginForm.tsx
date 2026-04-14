@@ -12,6 +12,7 @@ import {
 } from "@/config/loginFormConfig";
 import { loginSchema, LoginInput } from "@/lib/schemas/login";
 import Link from "next/link";
+import { ROUTES } from "@/lib/routes";
 
 interface LoginFormProps {
   onSubmit: (data: LoginInput) => Promise<void>;
@@ -78,7 +79,7 @@ const LoginForm = ({ onSubmit }: LoginFormProps) => {
 
       <p className="text-center text-sm text-gray-600">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="text-yellow-500 hover:underline">
+        <Link href={ROUTES.REGISTER} className="text-yellow-500 hover:underline">
           Signup
         </Link>
       </p>

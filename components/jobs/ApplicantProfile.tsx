@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useApplicationStatus } from "@/hooks/useApplicationStatus";
 import type { Applicant, Application } from "@/types/application";
+import { ROUTES } from "@/lib/routes";
 
 interface ApplicantProfileProps {
   applicant: Applicant;
@@ -64,7 +65,7 @@ export const ApplicantProfile: React.FC<ApplicantProfileProps> = ({
         <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
           {showBackLink && (
             <Link
-              href="/dashboard/jobs"
+              href={ROUTES.ADMIN.JOBS}
               className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-amber-600 mb-4"
             >
               <ArrowLeft className="h-4 w-4" />

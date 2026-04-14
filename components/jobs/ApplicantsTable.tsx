@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, Phone, Calendar, User, Eye, Check, X } from "lucide-react";
 import { useApplicationStatus } from "@/hooks/useApplicationStatus";
 import type { Job } from "@/types/application";
+import { ROUTES } from "@/lib/routes";
 
 interface ApplicantsTableProps {
   job: Job;
@@ -106,12 +107,22 @@ const ApplicantsTable: React.FC<ApplicantsTableProps> = ({ job }) => {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <Link
-                      href={`/dashboard/applicants/${app.applicantId}?jobId=${job.id}`}
-                      className="font-semibold text-gray-900 hover:text-amber-600 hover:underline"
-                    >
-                      {app.applicant?.fullname}
-                    </Link>
+                    {app.applicantId && (
+                      <Link
+                        href={ROUTES.ADMIN.APPLICANT_PROFILE(
+                          app.applicantId,
+                          job.id,
+                        )}
+                        className="font-semibold text-gray-900 hover:text-amber-600 hover:underline"
+                      >
+                        {app.applicant?.fullname}
+                      </Link>
+                    )}
+                    {!app.applicantId && (
+                      <span className="font-semibold text-gray-900">
+                        {app.applicant?.fullname}
+                      </span>
+                    )}
                     {app.applicant?.resume && (
                       <a
                         href={app.applicant.resume}
@@ -175,13 +186,18 @@ const ApplicantsTable: React.FC<ApplicantsTableProps> = ({ job }) => {
                   >
                     <X className="h-4 w-4" />
                   </Button>
-                  <Link
-                    href={`/dashboard/applicants/${app.applicantId}?jobId=${job.id}`}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 hover:text-amber-700 px-3 py-2 rounded-md hover:bg-amber-50"
-                  >
-                    <Eye className="h-3.5 w-3.5" />
-                    View
-                  </Link>
+                  {app.applicantId && (
+                    <Link
+                      href={ROUTES.ADMIN.APPLICANT_PROFILE(
+                        app.applicantId,
+                        job.id,
+                      )}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 hover:text-amber-700 px-3 py-2 rounded-md hover:bg-amber-50"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      View
+                    </Link>
+                  )}
                 </div>
               </TableCell>
             </TableRow>

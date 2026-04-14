@@ -4,6 +4,7 @@ import { createContext, useContext, ReactNode, useState, useEffect } from "react
 import { AuthUser } from "@/types/api";
 import { api, verifySession } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/lib/routes";
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserData(parsed);
         } else {
           localStorage.removeItem("userData");
-          router.push("/login");
+          router.push(ROUTES.LOGIN);
         }
       } catch {
         localStorage.removeItem("userData");
@@ -68,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       localStorage.removeItem("userData");
       setUserData(null);
-      router.push("/login");
+      router.push(ROUTES.LOGIN);
     }
   };
 

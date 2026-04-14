@@ -10,6 +10,7 @@ import { filterData } from "@/lib/data";
 import { Check } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
+import { ROUTES } from "@/lib/routes";
 
 const FilterJobs = () => {
   const router = useRouter();
@@ -51,7 +52,7 @@ const FilterJobs = () => {
       if (newParams.jobType) queryParams.set("jobType", newParams.jobType);
       if (newParams.salary) queryParams.set("salary", newParams.salary);
 
-      router.push(`/findjobs?${queryParams.toString()}`);
+      router.push(`${ROUTES.FIND_JOBS}?${queryParams.toString()}`);
     },
     [currentParams, router],
   );
@@ -60,7 +61,7 @@ const FilterJobs = () => {
     const params = new URLSearchParams();
     if (currentParams.keyword) params.set("keyword", currentParams.keyword);
     const queryString = params.toString();
-    router.push(queryString ? `/findjobs?${queryString}` : "/findjobs");
+    router.push(queryString ? `${ROUTES.FIND_JOBS}?${queryString}` : ROUTES.FIND_JOBS);
   };
 
   const hasActiveFilters =
