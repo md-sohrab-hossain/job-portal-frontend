@@ -9,7 +9,7 @@ const LatestJobCard = ({ job }: { job: Job }) => {
   return (
     <div className="p-5 rounded-2xl shadow-xl flex flex-col gap-4 bg-black/40 border border-gray-800 hover:border-yellow-400/50 transition-all cursor-pointer">
       <div className="flex items-start gap-4">
-        <div className="w-12 h-12 shrink-0 bg-white rounded-lg flex items-center justify-center">
+        <div className="relative w-12 h-12 shrink-0 bg-white rounded-lg flex items-center justify-center">
           {hasLogo ? (
             <Image
               src={job.company!.logo!}

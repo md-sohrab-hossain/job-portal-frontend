@@ -10,6 +10,15 @@ export function useJobs() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const normalizeJob = (j: any): Job => ({
+    ...j,
+    id: j.id || j._id,
+    company: j.company ? {
+      ...j.company,
+      id: j.company.id || j.company._id
+    } : undefined
+  });
 
   const loadJobs = useCallback(async () => {
     setLoading(true);
@@ -17,7 +26,7 @@ export function useJobs() {
     try {
       const res = (await api.jobs.adminList()) as ApiResponse<Job[]>;
       if (res.success && res.data) {
-        setJobs(res.data);
+        setJobs(res.data.map(normalizeJob));
       } else {
         setError(res.message || res.error || "Failed to load jobs");
       }
@@ -48,7 +57,7 @@ export function useJobs() {
     })) as ApiResponse<Job>;
 
     if (res.success && res.data) {
-      setJobs((prev) => [res.data!, ...prev]);
+      setJobs((prev) => [normalizeJob(res.data!), ...prev]);
       toast.success("Job posted successfully");
       return true;
     } else {
@@ -70,8 +79,9 @@ export function useJobs() {
     })) as ApiResponse<Job>;
 
     if (res.success && res.data) {
+      const normalized = normalizeJob(res.data);
       setJobs((prev) =>
-        prev.map((j) => (j.id === id ? res.data! : j))
+        prev.map((j) => (j.id === id ? normalized : j))
       );
       toast.success("Job updated successfully");
       return true;

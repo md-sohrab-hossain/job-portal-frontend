@@ -78,7 +78,7 @@ const ApplicationCard = ({ application }: { application: Application }) => {
         </div>
 
         <div className="flex items-center gap-4 mb-4">
-          <div className="h-12 w-12 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100 group-hover:bg-amber-50 group-hover:border-amber-100/50 transition-colors overflow-hidden">
+          <div className="relative h-12 w-12 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100 group-hover:bg-amber-50 group-hover:border-amber-100/50 transition-colors overflow-hidden">
             {application.job?.company?.logo ? (
               <Image
                 src={application.job.company.logo}

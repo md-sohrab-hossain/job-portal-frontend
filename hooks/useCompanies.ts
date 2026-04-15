@@ -11,6 +11,11 @@ export function useCompanies() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const normalizeCompany = (c: any): Company => ({
+    ...c,
+    id: c.id || c._id,
+  });
 
   const loadCompanies = useCallback(async () => {
     setLoading(true);
@@ -18,7 +23,7 @@ export function useCompanies() {
     try {
       const res = (await api.companies.getAll()) as ApiResponse<Company[]>;
       if (res.success && res.data) {
-        setCompanies(res.data);
+        setCompanies(res.data.map(normalizeCompany));
       } else {
         setError(res.message || res.error || "Failed to load companies");
       }
@@ -34,7 +39,7 @@ export function useCompanies() {
     loadCompanies();
   }, [loadCompanies]);
 
-  const addCompany = async (formData: CompanyFormData, logoFile?: File) => {
+  const addCompany = async (formData: CompanyFormData, logoFile?: File, userId?: string) => {
     const previousCompanies = [...companies];
     const temporaryId = `temp-${Date.now()}`;
     const optimisticCompany: Company = {
@@ -55,7 +60,11 @@ export function useCompanies() {
       const companyId = res.data.id || dataWithId._id;
       
       if (logoFile && companyId) {
-        const folder = `${UPLOAD_FOLDERS.companies(companyId)}/logos`;
+        // Use userId in folder path if available for better organization
+        const folder = userId 
+          ? `job-portal/users/${userId}/companies/${companyId}/logos`
+          : `job-portal/companies/${companyId}/logos`;
+
         try {
           const uploadRes = await uploadToCloudinary(logoFile, "companyLogo", { folder });
           const logoUrl = uploadRes.secure_url || uploadRes.url;
@@ -67,8 +76,9 @@ export function useCompanies() {
         }
       }
       
+      const normalized = normalizeCompany(res.data);
       setCompanies((prev) =>
-        prev.map((c) => (c.id === temporaryId ? res.data! : c)),
+        prev.map((c) => (c.id === temporaryId ? normalized : c)),
       );
       toast.success("Company created");
       return true;
@@ -79,7 +89,12 @@ export function useCompanies() {
     }
   };
 
-  const updateCompany = async (id: string, formData: CompanyFormData) => {
+  const updateCompany = async (
+    id: string,
+    formData: CompanyFormData,
+    logoFile?: File,
+    userId?: string,
+  ) => {
     const previousCompanies = [...companies];
     const originalCompany = companies.find((c) => c.id === id);
 
@@ -97,11 +112,33 @@ export function useCompanies() {
       prev.map((c) => (c.id === id ? optimisticCompany : c)),
     );
 
-    const res = (await api.companies.update(
-      id,
-      formData,
-    )) as ApiResponse<Company>;
-    if (res.success) {
+    let finalLogoUrl = formData.logo;
+
+    if (logoFile) {
+      const folder = userId
+        ? `job-portal/users/${userId}/companies/${id}/logos`
+        : `job-portal/companies/${id}/logos`;
+      try {
+        const uploadRes = await uploadToCloudinary(logoFile, "companyLogo", {
+          folder,
+        });
+        finalLogoUrl = uploadRes.secure_url || uploadRes.url;
+      } catch (err) {
+        console.error(err);
+        toast.error("Logo upload failed, but profile data will be updated");
+      }
+    }
+
+    const res = (await api.companies.update(id, {
+      ...formData,
+      logo: finalLogoUrl,
+    })) as ApiResponse<Company>;
+
+    if (res.success && res.data) {
+      const normalized = normalizeCompany(res.data);
+      setCompanies((prev) =>
+        prev.map((c) => (c.id === id ? normalized : c)),
+      );
       toast.success("Company updated");
       return true;
     } else {

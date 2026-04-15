@@ -54,7 +54,12 @@ function FindJobsContent() {
       const data = await api.jobs.getAll(cleanParams);
 
       if (data.success && data.data) {
-        setJobs(data.data as unknown as JobType[]);
+        const normalized = (data.data as any[]).map((j: any) => ({
+          ...j,
+          id: j.id || j._id,
+          company: j.company ? { ...j.company, id: j.company.id || j.company._id } : j.company
+        }));
+        setJobs(normalized);
       } else {
         setError(data.message || data.error || "Failed to fetch jobs");
         setJobs([]);
@@ -88,7 +93,12 @@ function FindJobsContent() {
         if (!mounted) return;
 
         if (data.success && data.data) {
-          setJobs(data.data as unknown as JobType[]);
+          const normalized = (data.data as any[]).map((j: any) => ({
+            ...j,
+            id: j.id || j._id,
+            company: j.company ? { ...j.company, id: j.company.id || j.company._id } : j.company
+          }));
+          setJobs(normalized);
         } else {
           setError(data.message || data.error || "Failed to fetch jobs");
           setJobs([]);

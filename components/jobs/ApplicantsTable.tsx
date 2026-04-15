@@ -125,9 +125,9 @@ const ApplicantsTable: React.FC<ApplicantsTableProps> = ({ job }) => {
                         {app.applicant?.fullname}
                       </span>
                     )}
-                    {app.applicant?.resume && (
+                    {app.applicant?.profileResume && (
                       <a
-                        href={app.applicant.resume}
+                        href={app.applicant.profileResume}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="block text-xs text-amber-600 hover:text-amber-700"

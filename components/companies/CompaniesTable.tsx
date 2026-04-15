@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { useCompanies } from "@/hooks/useCompanies";
+import { useAuth } from "@/context/auth-context";
 import { type Company, type CompanyFormData } from "@/types/company";
 import { CompanyRow } from "./CompanyRow";
 import { CompanyFormModal } from "./CompanyFormModal";
@@ -35,6 +36,8 @@ export default function CompaniesTable() {
     updateCompany,
     deleteCompany,
   } = useCompanies();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const [search, setSearch] = useState("");
 
@@ -78,9 +81,9 @@ export default function CompaniesTable() {
 
   const handleFormSubmit = async (data: CompanyFormData, logoFile?: File) => {
     if (editingId) {
-      return await updateCompany(editingId, data);
+      return await updateCompany(editingId, data, logoFile, userId);
     } else {
-      return await addCompany(data, logoFile);
+      return await addCompany(data, logoFile, userId);
     }
   };
 
