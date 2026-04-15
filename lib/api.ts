@@ -114,6 +114,7 @@ export const api = {
     adminList: () => clientFetch(Endpoints.jobs.admin),
     getFavorites: () => clientFetch(Endpoints.jobs.favorites),
     favorite: (id: string) => post(Endpoints.jobs.favorite(id)),
+    apply: (id: string) => post(Endpoints.applications.apply(id)),
   },
 
   companies: createCrudMethods(Endpoints.companies.base),

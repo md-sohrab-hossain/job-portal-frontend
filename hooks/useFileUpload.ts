@@ -2,58 +2,68 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import uploadFile from "@/lib/uploadFile";
+import { uploadToCloudinary, validateFile, type FileType } from "@/lib/upload";
 
 interface UseFileUploadOptions {
-  maxSize?: number;
-  allowedTypes?: string[];
+  fileType?: FileType;
+  folder?: string;
 }
 
 interface UseFileUploadReturn {
   file: File | null;
   url: string;
   isUploading: boolean;
-  handleUpload: (file: File) => Promise<void>;
-  clearFile: () => void;
+  error: string | null;
+  upload: (file: File, folder?: string) => Promise<string | null>;
+  clear: () => void;
 }
 
-export function useFileUpload(
-  options: UseFileUploadOptions = {},
-): UseFileUploadReturn {
-  const { maxSize = 5 * 1024 * 1024, allowedTypes = [] } = options;
+export function useFileUpload(options: UseFileUploadOptions = {}): UseFileUploadReturn {
+  const { fileType = "photo", folder: defaultFolder } = options;
 
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleUpload = async (fileToUpload: File) => {
-    if (allowedTypes.length > 0 && !allowedTypes.includes(fileToUpload.type)) {
-      toast.error("Invalid file type");
-      return;
-    }
-
-    if (fileToUpload.size > maxSize) {
-      toast.error(`File too large. Maximum size is ${maxSize / 1024 / 1024}MB`);
-      return;
+  const upload = async (fileToUpload: File, folder?: string): Promise<string | null> => {
+    const validationError = validateFile(fileToUpload, fileType);
+    if (validationError) {
+      setError(validationError);
+      toast.error(validationError);
+      return null;
     }
 
     setIsUploading(true);
+    setError(null);
+
     try {
-      const response = await uploadFile(fileToUpload);
+      const uploadFolder = folder || defaultFolder;
+      const response = await uploadToCloudinary(fileToUpload, fileType, {
+        folder: uploadFolder,
+      });
+      const uploadedUrl = response.secure_url || response.url;
+      
       setFile(fileToUpload);
-      setUrl(response?.url || "");
+      setUrl(uploadedUrl);
       toast.success("Uploaded successfully");
-    } catch {
-      toast.error("Upload failed");
+      
+      return uploadedUrl;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Upload failed";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return null;
     } finally {
       setIsUploading(false);
     }
   };
 
-  const clearFile = () => {
+  const clear = () => {
     setFile(null);
     setUrl("");
+    setError(null);
   };
 
-  return { file, url, isUploading, handleUpload, clearFile };
+  return { file, url, isUploading, error, upload, clear };
 }

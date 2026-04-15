@@ -101,7 +101,9 @@ const ApplicantsTable: React.FC<ApplicantsTableProps> = ({ job }) => {
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10 border border-gray-100">
-                    <AvatarImage src={app.applicant?.profilePhoto} />
+                    {app.applicant?.profilePhoto && (
+                      <AvatarImage src={app.applicant.profilePhoto} />
+                    )}
                     <AvatarFallback className="bg-amber-100 text-amber-700 text-sm font-bold">
                       {app.applicant?.fullname?.charAt(0) || "?"}
                     </AvatarFallback>

@@ -9,6 +9,7 @@ export interface Company {
 }
 
 export interface CompanyFormData {
+  id?: string;
   name: string;
   description?: string;
   website?: string;

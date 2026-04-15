@@ -33,7 +33,9 @@ export function JobRow({ job, onEdit, onDelete }: JobRowProps) {
       <TableCell className="align-top pt-5">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 border border-gray-100 shadow-sm">
-            <AvatarImage src={job.company?.logo} alt={job.company?.name} />
+            {job.company?.logo && (
+              <AvatarImage src={job.company.logo} alt={job.company.name} />
+            )}
             <AvatarFallback className="bg-amber-100 text-amber-700 text-xs font-bold">
               {job.company?.name?.charAt(0) || "J"}
             </AvatarFallback>
@@ -93,35 +95,9 @@ export function JobRow({ job, onEdit, onDelete }: JobRowProps) {
           title="View Applicants"
         >
           <div className="flex -space-x-2.5">
-            {job.applications && job.applications.length > 0 ? (
-              job.applications.slice(0, 3).map((app) => (
-                <div
-                  key={app.id}
-                  className="h-8 w-8 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center overflow-hidden shadow-sm ring-1 ring-gray-100"
-                >
-                  {app.applicant?.profilePhoto ? (
-                    <Image
-                      src={app.applicant.profilePhoto}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      width={32}
-                      height={32}
-                    />
-                  ) : (
-                    <User className="h-4 w-4 text-gray-400" />
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="h-8 w-8 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center shadow-sm ring-1 ring-gray-100 font-bold text-gray-300">
-                <Users className="h-4 w-4" />
-              </div>
-            )}
-            {job.applications && job.applications.length > 3 && (
-              <div className="h-8 w-8 rounded-full border-2 border-white bg-amber-100 flex items-center justify-center text-[10px] font-bold text-amber-700 shadow-sm z-10 ring-1 ring-amber-200">
-                +{job.applications.length - 3}
-              </div>
-            )}
+            <div className="h-9 w-9 rounded-full border-2 border-white bg-amber-100/50 flex items-center justify-center shadow-sm ring-1 ring-amber-200/50">
+              <Users className="h-4.5 w-4.5 text-amber-600" />
+            </div>
           </div>
 
           <div className="flex flex-col flex-1 min-w-0">

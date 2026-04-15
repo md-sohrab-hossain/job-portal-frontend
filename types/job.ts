@@ -21,10 +21,10 @@ export interface Applicant {
   email: string;
   phoneNumber?: string;
   profilePhoto?: string;
-  resume?: string;
-  resumeOriginalName?: string;
-  bio?: string;
-  skills?: string[];
+  profileResume?: string;
+  profileResumeOriginalName?: string;
+  profileBio?: string;
+  profileSkills?: string[];
 }
 
 export interface Application {

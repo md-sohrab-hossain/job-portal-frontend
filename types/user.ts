@@ -10,7 +10,8 @@ export interface User {
   profileBio?: string;
   profileSkills?: string[];
   profilePhoto?: string;
-  resume?: string;
+  profileResume?: string;
+  profileResumeOriginalName?: string;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -76,11 +76,11 @@ export default function CompaniesTable() {
     setShowForm(true);
   };
 
-  const handleFormSubmit = async (data: CompanyFormData) => {
+  const handleFormSubmit = async (data: CompanyFormData, logoFile?: File) => {
     if (editingId) {
       return await updateCompany(editingId, data);
     } else {
-      return await addCompany(data);
+      return await addCompany(data, logoFile);
     }
   };
 

@@ -5,41 +5,103 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RegisterInput } from "@/lib/schemas/register";
 import RegisterForm from "@/components/auth/RegisterForm";
-import { handleFileUpload } from "@/lib/helpers/register";
 import { api } from "@/lib/api";
 import { ROUTES } from "@/lib/routes";
+import { uploadToCloudinary, validateFile } from "@/lib/upload";
+
+function getPendingFolder(email: string, type: "photos" | "resumes"): string {
+  const hash = email.toLowerCase().replace(/[^a-z0-9]/g, "_").substring(0, 50);
+  return `job-portal/pending/${hash}/${type}`;
+}
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [profilePhoto, setProfilePhoto] = useState<string>("");
-  const [profileResume, setProfileResume] = useState<string>("");
+  
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const onFileChange = (file: File, type: "photo" | "resume") => {
-    handleFileUpload(file, type, (url) => {
-      if (type === "photo") setProfilePhoto(url);
-      else setProfileResume(url);
-    });
+  const onPhotoChange = (file: File) => {
+    const error = validateFile(file, "photo");
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    const preview = URL.createObjectURL(file);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(preview);
   };
 
-  const onSubmit = async (data: RegisterInput) => {
-    const payload = {
-      ...data,
-      profilePhoto: profilePhoto || undefined,
-      profileResume: profileResume || undefined,
-    };
+  const onResumeChange = (file: File) => {
+    const error = validateFile(file, "resume");
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    setResumeFileName(file.name);
+  };
+
+  const onPhotoRemove = () => {
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(null);
+  };
+
+  const onResumeRemove = () => {
+    setResumeFileName(null);
+  };
+
+  const onSubmit = async (data: RegisterInput, files: { photo?: File; resume?: File }) => {
+    setIsUploading(true);
 
     try {
-      const response = await api.auth.register(payload);
+      let profilePhoto: string | undefined;
+      let profileResume: string | undefined;
+
+      if (files.photo) {
+        try {
+          const folder = getPendingFolder(data.email, "photos");
+          const res = await uploadToCloudinary(files.photo, "photo", { folder });
+          profilePhoto = res.secure_url || res.url;
+        } catch {
+          toast.error("Photo upload failed");
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      if (files.resume) {
+        try {
+          const folder = getPendingFolder(data.email, "resumes");
+          const res = await uploadToCloudinary(files.resume, "resume", { folder });
+          profileResume = res.secure_url || res.url;
+        } catch {
+          toast.error("Resume upload failed");
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      const response = await api.auth.register({
+        ...data,
+        profilePhoto,
+        profileResume,
+      });
 
       if (!response.success) {
         toast.error(response.message || "Registration failed");
+        setIsUploading(false);
         return;
       }
 
       toast.success("Registration successful! Please login.");
       router.push(ROUTES.LOGIN);
-    } catch {
+    } catch (err) {
+      console.error("Registration error:", err);
       toast.error("Something went wrong");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -47,11 +109,13 @@ export default function RegisterPage() {
     <div className="flex items-start justify-center w-xl m-auto z-10">
       <RegisterForm
         onSubmit={onSubmit}
-        profilePhoto={profilePhoto}
-        profileResume={profileResume}
-        onPhotoRemove={() => setProfilePhoto("")}
-        onResumeRemove={() => setProfileResume("")}
-        onFileChange={onFileChange}
+        profilePhoto={photoPreview}
+        profileResume={resumeFileName}
+        onPhotoRemove={onPhotoRemove}
+        onResumeRemove={onResumeRemove}
+        onPhotoChange={onPhotoChange}
+        onResumeChange={onResumeChange}
+        isUploading={isUploading}
       />
     </div>
   );

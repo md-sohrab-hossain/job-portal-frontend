@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Upload, Loader2 } from "lucide-react";
@@ -11,7 +11,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { type CompanyFormData } from "@/types/company";
 import { companySchema, type CompanyInput } from "@/lib/schemas/company";
 import { COMPANY_FORM_FIELDS } from "@/config/companyFormConfig";
-import uploadFile from "@/lib/uploadFile";
+import { validateFile } from "@/lib/upload";
 import { toast } from "sonner";
 
 interface CompanyFormModalProps {
@@ -19,7 +19,7 @@ interface CompanyFormModalProps {
   onClose: () => void;
   initialData: CompanyFormData;
   isEditing: boolean;
-  onSubmit: (data: CompanyInput) => Promise<boolean>;
+  onSubmit: (data: CompanyInput, logoFile?: File) => Promise<boolean>;
 }
 
 export function CompanyFormModal({
@@ -29,12 +29,13 @@ export function CompanyFormModal({
   isEditing,
   onSubmit,
 }: CompanyFormModalProps) {
-  const [uploading, setUploading] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
-    setValue,
     watch,
     reset,
     formState: { errors, isSubmitting },
@@ -45,34 +46,51 @@ export function CompanyFormModal({
 
   const logoUrl = watch("logo");
 
-  // Reset form when initialData or isOpen changes
   useEffect(() => {
     if (isOpen) {
       reset(initialData);
+      setLogoPreview(null);
+      setLogoFile(null);
     }
   }, [initialData, isOpen, reset]);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (!isEditing && initialData.logo) {
+      setLogoPreview(initialData.logo);
+    }
+  }, [initialData.logo, isEditing]);
+
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
-    try {
-      const res = await uploadFile(file);
-      if (res?.url) {
-        setValue("logo", res.url, { shouldValidate: true });
-        toast.success("Logo uploaded");
-      }
-    } catch {
-      toast.error("Upload failed");
-    } finally {
-      setUploading(false);
+    const error = validateFile(file, "companyLogo");
+    if (error) {
+      toast.error(error);
+      return;
     }
+
+    const preview = URL.createObjectURL(file);
+    if (logoPreview && !initialData.logo) URL.revokeObjectURL(logoPreview);
+    setLogoPreview(preview);
+    setLogoFile(file);
   };
 
+  const removeLogo = () => {
+    if (logoPreview && !initialData.logo) URL.revokeObjectURL(logoPreview);
+    setLogoPreview(null);
+    setLogoFile(null);
+    if (logoInputRef.current) logoInputRef.current.value = "";
+  };
+
+  const displayLogo = logoPreview || logoUrl;
+
   const onFormSubmit = async (data: CompanyInput) => {
-    const success = await onSubmit(data);
-    if (success) onClose();
+    const success = await onSubmit(data, logoFile || undefined);
+    if (success) {
+      if (logoPreview && !initialData.logo) URL.revokeObjectURL(logoPreview);
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -103,40 +121,49 @@ export function CompanyFormModal({
           </div>
 
           <form onSubmit={handleSubmit(onFormSubmit)} className="p-6 space-y-4">
-            {/* Logo Upload */}
             <div className="flex justify-center">
-              <label className="cursor-pointer group flex flex-col items-center">
+              <div className="cursor-pointer group flex flex-col items-center">
                 <input
+                  ref={logoInputRef}
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={handleUpload}
-                  disabled={uploading}
+                  onChange={handleLogoSelect}
                 />
-                <Avatar className="h-20 w-20 border-2 border-dashed border-gray-300 group-hover:border-amber-400 transition-colors">
+                <Avatar 
+                  className="h-20 w-20 border-2 border-dashed border-gray-300 group-hover:border-amber-400 transition-colors"
+                  onClick={() => logoInputRef.current?.click()}
+                >
                   <AvatarImage
-                    src={logoUrl}
+                    src={displayLogo}
                     alt="Preview"
                     className="bg-white object-cover"
                   />
                   <AvatarFallback className="bg-gray-50 text-gray-400">
-                    {uploading ? (
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                    ) : (
-                      <Upload className="h-6 w-6" />
-                    )}
+                    <Upload className="h-6 w-6" />
                   </AvatarFallback>
                 </Avatar>
                 <span className="text-xs text-gray-500 mt-2 font-medium group-hover:text-amber-600 transition-colors">
-                  {uploading ? "Uploading..." : "Upload Logo"}
+                  Upload Logo
                 </span>
+                {displayLogo && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeLogo();
+                    }}
+                    className="text-xs text-red-500 hover:text-red-600 mt-1"
+                  >
+                    Remove
+                  </button>
+                )}
                 {errors.logo && (
                   <p className="text-[11px] text-red-500 mt-1">{errors.logo.message}</p>
                 )}
-              </label>
+              </div>
             </div>
 
-            {/* Dynamic Fields from Config */}
             {COMPANY_FORM_FIELDS.map((field) => (
               <div key={field.name}>
                 <Label
@@ -151,8 +178,7 @@ export function CompanyFormModal({
                   id={field.name}
                   type={field.type}
                   placeholder={field.placeholder}
-                  className={`mt-1.5 focus-visible:ring-amber-400 ${errors[field.name] ? "border-red-500" : ""
-                    }`}
+                  className={`mt-1.5 focus-visible:ring-amber-400 ${errors[field.name] ? "border-red-500" : ""}`}
                 />
                 {errors[field.name] && (
                   <p className="text-[11px] text-red-500 mt-1">
@@ -173,7 +199,7 @@ export function CompanyFormModal({
               </Button>
               <Button
                 type="submit"
-                disabled={isSubmitting || uploading}
+                disabled={isSubmitting}
                 className="bg-amber-400 hover:bg-amber-500 text-black px-6 shadow-sm"
               >
                 {isSubmitting ? (

@@ -4,10 +4,10 @@ export interface Applicant {
   email: string;
   phoneNumber?: string;
   profilePhoto?: string;
-  bio?: string;
-  skills?: string[];
-  resume?: string;
-  resumeOriginalName?: string;
+  profileBio?: string;
+  profileSkills?: string[];
+  profileResume?: string;
+  profileResumeOriginalName?: string;
 }
 
 export interface Application {

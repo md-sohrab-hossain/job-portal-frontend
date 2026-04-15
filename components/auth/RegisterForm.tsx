@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import SelectForm from "@/components/SelectForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileUpload } from "@/components/auth/FileUpload";
 import { SkillInput } from "@/components/auth/SkillInput";
 import AuthFormField from "@/components/auth/AuthFormField";
 import {
@@ -18,12 +18,14 @@ import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
 
 interface RegisterFormProps {
-  onSubmit: (data: RegisterInput) => Promise<void>;
-  profilePhoto?: string;
-  profileResume?: string;
+  onSubmit: (data: RegisterInput, files: { photo?: File; resume?: File }) => Promise<void>;
+  profilePhoto?: string | null;
+  profileResume?: string | null;
   onPhotoRemove?: () => void;
   onResumeRemove?: () => void;
-  onFileChange?: (file: File, type: "photo" | "resume") => void;
+  onPhotoChange?: (file: File) => void;
+  onResumeChange?: (file: File) => void;
+  isUploading?: boolean;
 }
 
 const RegisterForm = ({
@@ -32,9 +34,15 @@ const RegisterForm = ({
   profileResume,
   onPhotoRemove,
   onResumeRemove,
-  onFileChange,
+  onPhotoChange,
+  onResumeChange,
+  isUploading = false,
 }: RegisterFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
 
   const {
     register,
@@ -57,10 +65,47 @@ const RegisterForm = ({
 
   const handlePasswordToggle = () => setShowPassword(!showPassword);
 
+  const isSubmittingOrUploading = isSubmitting || isUploading;
+
+  const handleFormSubmit = handleSubmit((data) => {
+    onSubmit(data, {
+      photo: photoFile || undefined,
+      resume: resumeFile || undefined,
+    });
+  });
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPhotoFile(file);
+      onPhotoChange?.(file);
+    }
+  };
+
+  const handleResumeSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setResumeFile(file);
+      onResumeChange?.(file);
+    }
+  };
+
+  const handlePhotoRemove = () => {
+    setPhotoFile(null);
+    if (photoInputRef.current) photoInputRef.current.value = "";
+    onPhotoRemove?.();
+  };
+
+  const handleResumeRemove = () => {
+    setResumeFile(null);
+    if (resumeInputRef.current) resumeInputRef.current.value = "";
+    onResumeRemove?.();
+  };
+
   return (
     <form
       className="flex flex-col gap-2 w-full border border-gray-200 rounded p-4 bg-gray-100"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleFormSubmit}
     >
       {REGISTER_FORM_FIELDS.map((field) => (
         <AuthFormField
@@ -79,44 +124,69 @@ const RegisterForm = ({
         error={errors.profileSkills?.message as string | undefined}
       />
 
-      <FileUpload
-        label="Upload photo"
-        value={profilePhoto}
-        accept="image/jpeg,image/png,image/webp"
-        onRemove={onPhotoRemove}
-        onChange={(file) => file && onFileChange?.(file, "photo")}
-      >
-        <Avatar className="w-full h-full">
-          <AvatarImage src={profilePhoto} alt="profile" />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
-      </FileUpload>
-
-      <FileUpload
-        label="Upload resume"
-        value={profileResume}
-        accept="application/pdf"
-        onRemove={onResumeRemove}
-        onChange={(file) => file && onFileChange?.(file, "resume")}
-      >
-        <object
-          data={profileResume}
-          type="application/pdf"
-          className="w-full h-full"
-        >
-          <p className="text-sm text-gray-600">
-            Preview not available.{" "}
-            <a
-              href={profileResume}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-yellow-500 hover:underline"
+      <div className="space-y-1">
+        <label className="text-sm text-gray-600 font-medium">Upload photo</label>
+        {profilePhoto ? (
+          <div className="relative mt-1 w-20 h-20">
+            <Avatar className="w-full h-full">
+              <AvatarImage src={profilePhoto} alt="profile" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            <button
+              type="button"
+              onClick={handlePhotoRemove}
+              className="absolute -top-1 -right-1 z-10 cursor-pointer bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
             >
-              Open in new tab
-            </a>
-          </p>
-        </object>
-      </FileUpload>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <label className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm cursor-pointer hover:border-yellow-400 transition-colors">
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handlePhotoSelect}
+              className="hidden"
+            />
+            <span className="m-auto file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-yellow-400 file:text-black file:text-sm file:font-medium">
+              Choose Photo
+            </span>
+          </label>
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-sm text-gray-600 font-medium">Upload resume (PDF)</label>
+        {profileResume ? (
+          <div className="relative flex items-center gap-2 p-2 border border-gray-200 rounded bg-white">
+            <span className="text-sm text-gray-700 truncate flex-1">{profileResume}</span>
+            <button
+              type="button"
+              onClick={handleResumeRemove}
+              className="text-red-500 hover:text-red-600 text-sm"
+            >
+              Remove
+            </button>
+          </div>
+        ) : (
+          <label className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm cursor-pointer hover:border-yellow-400 transition-colors">
+            <input
+              ref={resumeInputRef}
+              type="file"
+              accept="application/pdf"
+              onChange={handleResumeSelect}
+              className="hidden"
+            />
+            <span className="m-auto file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-yellow-400 file:text-black file:text-sm file:font-medium">
+              Choose Resume
+            </span>
+          </label>
+        )}
+      </div>
 
       <SelectForm
         name="role"
@@ -134,10 +204,17 @@ const RegisterForm = ({
 
       <Button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmittingOrUploading}
         className="w-full my-4 bg-yellow-400/90 hover:bg-yellow-400/95 cursor-pointer"
       >
-        {isSubmitting ? "Creating Account..." : "Sign Up"}
+        {isSubmittingOrUploading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Creating Account...
+          </>
+        ) : (
+          "Sign Up"
+        )}
       </Button>
 
       <p className="text-center text-sm text-gray-600">

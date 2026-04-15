@@ -7,11 +7,12 @@ export const updateProfileSchema = z.object({
     .max(100, "Full name must be less than 100 characters"),
   phoneNumber: z
     .string()
-    .min(1, "Phone number is required")
     .regex(
       /^\+[1-9]\d{1,14}$/,
-      "Phone number must include country code (e.g., +1234567890)"
-    ),
+      "Phone number must include country code (e.g., +8801XXXXXXXXX)"
+    )
+    .optional()
+    .or(z.literal("")),
   profileBio: z
     .string()
     .max(1000, "Bio must be less than 1000 characters")

@@ -5,6 +5,7 @@ import { api } from "@/lib/api";
 import { type Company, type CompanyFormData } from "@/types/company";
 import { type ApiResponse } from "@/types/api";
 import { toast } from "sonner";
+import { uploadToCloudinary, UPLOAD_FOLDERS } from "@/lib/upload";
 
 export function useCompanies() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -33,7 +34,7 @@ export function useCompanies() {
     loadCompanies();
   }, [loadCompanies]);
 
-  const addCompany = async (formData: CompanyFormData) => {
+  const addCompany = async (formData: CompanyFormData, logoFile?: File) => {
     const previousCompanies = [...companies];
     const temporaryId = `temp-${Date.now()}`;
     const optimisticCompany: Company = {
@@ -50,6 +51,22 @@ export function useCompanies() {
 
     const res = (await api.companies.create(formData)) as ApiResponse<Company>;
     if (res.success && res.data) {
+      const dataWithId = res.data as Company & { _id?: string };
+      const companyId = res.data.id || dataWithId._id;
+      
+      if (logoFile && companyId) {
+        const folder = `${UPLOAD_FOLDERS.companies(companyId)}/logos`;
+        try {
+          const uploadRes = await uploadToCloudinary(logoFile, "companyLogo", { folder });
+          const logoUrl = uploadRes.secure_url || uploadRes.url;
+          
+          await api.companies.update(companyId, { logo: logoUrl });
+          res.data.logo = logoUrl;
+        } catch {
+          toast.error("Logo upload failed, but company was created");
+        }
+      }
+      
       setCompanies((prev) =>
         prev.map((c) => (c.id === temporaryId ? res.data! : c)),
       );

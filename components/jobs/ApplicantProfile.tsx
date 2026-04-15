@@ -18,6 +18,7 @@ import {
 import { useApplicationStatus } from "@/hooks/useApplicationStatus";
 import type { Applicant, Application } from "@/types/application";
 import { ROUTES } from "@/lib/routes";
+import { getCloudinaryPdfUrl, getCloudinaryPdfViewUrl } from "@/lib/upload";
 
 interface ApplicantProfileProps {
   applicant: Applicant;
@@ -75,10 +76,12 @@ export const ApplicantProfile: React.FC<ApplicantProfileProps> = ({
 
           <div className="flex flex-col items-center text-center">
             <Avatar className="h-20 w-20 border-4 border-amber-50 mb-4">
-              <AvatarImage
-                src={applicant.profilePhoto}
-                alt={applicant.fullname}
-              />
+              {applicant.profilePhoto && (
+                <AvatarImage
+                  src={applicant.profilePhoto}
+                  alt={applicant.fullname}
+                />
+              )}
               <AvatarFallback className="bg-amber-100 text-amber-700 text-xl font-bold">
                 {applicant.fullname?.charAt(0) || "U"}
               </AvatarFallback>
@@ -137,15 +140,15 @@ export const ApplicantProfile: React.FC<ApplicantProfileProps> = ({
             Professional Bio
           </h3>
           <p className="text-gray-600 leading-relaxed">
-            {applicant.bio || "No bio provided by the candidate."}
+            {applicant.profileBio || "No bio provided by the candidate."}
           </p>
         </section>
 
         <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Skills</h3>
           <div className="flex flex-wrap gap-2">
-            {applicant.skills?.length ? (
-              applicant.skills.map((skill, i) => (
+            {applicant.profileSkills?.length ? (
+              applicant.profileSkills.map((skill, i) => (
                 <Badge
                   key={i}
                   variant="secondary"
@@ -162,7 +165,7 @@ export const ApplicantProfile: React.FC<ApplicantProfileProps> = ({
 
         <section className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Resume</h3>
-          {applicant.resume ? (
+          {applicant.profileResume ? (
             <div className="flex items-center justify-between p-4 rounded-lg border border-amber-200 bg-amber-50">
               <div className="flex items-center gap-3">
                 <div className="bg-amber-100 p-2 rounded-lg">
@@ -170,13 +173,13 @@ export const ApplicantProfile: React.FC<ApplicantProfileProps> = ({
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-900">
-                    {applicant.resumeOriginalName || "Resume.pdf"}
+                    {applicant.profileResumeOriginalName || "Resume.pdf"}
                   </span>
                 </div>
               </div>
               <div className="flex gap-2">
                 <a
-                  href={applicant.resume}
+                  href={getCloudinaryPdfViewUrl(applicant.profileResume)!}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-lg bg-white text-gray-600 hover:text-amber-600 border border-gray-200"
@@ -184,8 +187,8 @@ export const ApplicantProfile: React.FC<ApplicantProfileProps> = ({
                   <ExternalLink className="h-4 w-4" />
                 </a>
                 <a
-                  href={applicant.resume}
-                  download
+                  href={getCloudinaryPdfUrl(applicant.profileResume)!}
+                  download={applicant.profileResumeOriginalName || "resume.pdf"}
                   className="p-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700"
                 >
                   <Download className="h-4 w-4" />
