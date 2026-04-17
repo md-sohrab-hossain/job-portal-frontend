@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: job_portal_frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NEXT_PUBLIC_API_URL=http://job_portal_backend:5000
+    networks:
+      - job-portal-network
+    restart: unless-stopped
+
+networks:
+  job-portal-network:
+    external: true
