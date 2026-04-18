@@ -106,17 +106,19 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-start justify-center w-xl m-auto z-10">
-      <RegisterForm
-        onSubmit={onSubmit}
-        profilePhoto={photoPreview}
-        profileResume={resumeFileName}
-        onPhotoRemove={onPhotoRemove}
-        onResumeRemove={onResumeRemove}
-        onPhotoChange={onPhotoChange}
-        onResumeChange={onResumeChange}
-        isUploading={isUploading}
-      />
-    </div>
+    <main className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-140px)]">
+      <div className="w-full max-w-2xl z-10">
+        <RegisterForm
+          onSubmit={onSubmit}
+          profilePhoto={photoPreview}
+          profileResume={resumeFileName}
+          onPhotoRemove={onPhotoRemove}
+          onResumeRemove={onResumeRemove}
+          onPhotoChange={onPhotoChange}
+          onResumeChange={onResumeChange}
+          isUploading={isUploading}
+        />
+      </div>
+    </main>
   );
 }

@@ -54,6 +54,7 @@ export function JobContent({
             src="https://app.hrango.com:4414/assets/images/no-data-folder.svg"
             alt="No jobs found"
             fill
+            sizes="128px"
             className="object-contain"
           />
         </div>

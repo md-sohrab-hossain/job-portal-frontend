@@ -34,10 +34,7 @@ const ShowCategories = () => {
         <CarouselContent>
           {categories.map((category) => (
             <CarouselItem key={category} className="md:basis-1/3">
-              <Link
-                href={getFindJobsUrl(undefined, category)}
-                className="p-2 block"
-              >
+              <Link href={getFindJobsUrl(category)} className="p-2 block">
                 <Button className="w-full rounded-full bg-black/50 text-yellow-400 hover:bg-yellow-400 cursor-pointer hover:text-black transition-colors">
                   {category}
                 </Button>
@@ -45,8 +42,10 @@ const ShowCategories = () => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <div className="flex justify-center items-center gap-4 mt-8 md:mt-0">
+          <CarouselPrevious className="static md:absolute -left-12 translate-y-0 md:-translate-y-1/2 bg-white/5 border-white/10 hover:bg-primary/20 hover:text-primary transition-all cursor-pointer h-10 w-10" />
+          <CarouselNext className="static md:absolute -right-12 translate-y-0 md:-translate-y-1/2 bg-white/5 border-white/10 hover:bg-primary/20 hover:text-primary transition-all cursor-pointer h-10 w-10" />
+        </div>
       </Carousel>
     </div>
   );

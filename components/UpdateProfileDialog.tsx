@@ -200,7 +200,7 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="p-8 space-y-5 bg-white max-h-[calc(100vh-220px)] overflow-y-auto"
+          className="p-8 space-y-5 bg-white max-h-[calc(100vh-220px)] overflow-y-auto text-gray-900"
         >
           <div className="space-y-6">
             <ProfilePhotoUpload
@@ -226,7 +226,7 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
           <div className="space-y-2">
             <Label
               htmlFor="fullname"
-              className="text-xs font-bold text-gray-400 uppercase tracking-widest"
+              className="text-xs font-bold text-gray-500 uppercase tracking-widest"
             >
               Full Name
             </Label>
@@ -238,11 +238,11 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
                 id="fullname"
                 {...register("fullname")}
                 placeholder="Enter your full name"
-                className="pl-10 h-11 border-gray-100 bg-gray-50/50 rounded-xl focus-visible:ring-amber-500 focus-visible:bg-white transition-all"
+                className="pl-10 h-11 border-gray-100 bg-gray-50/50 rounded-xl focus-visible:ring-amber-500 focus-visible:bg-white transition-all text-gray-900"
               />
             </div>
             {errors.fullname && (
-              <p className="text-xs text-red-500">{errors.fullname.message}</p>
+              <p className="text-xs text-red-500 font-medium">{errors.fullname.message}</p>
             )}
           </div>
 
@@ -250,7 +250,7 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
             <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="text-xs font-bold text-gray-400 uppercase tracking-widest"
+                className="text-xs font-bold text-gray-500 uppercase tracking-widest"
               >
                 Email Address
               </Label>
@@ -262,7 +262,7 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
                   id="email"
                   value={user.email}
                   disabled
-                  className="pl-10 h-11 border-gray-100 bg-gray-100/50 rounded-xl opacity-60 cursor-not-allowed"
+                  className="pl-10 h-11 border-gray-100 bg-gray-100/50 rounded-xl opacity-60 cursor-not-allowed text-gray-900"
                 />
               </div>
             </div>
@@ -270,7 +270,7 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
             <div className="space-y-2">
               <Label
                 htmlFor="phoneNumber"
-                className="text-xs font-bold text-gray-400 uppercase tracking-widest"
+                className="text-xs font-bold text-gray-500 uppercase tracking-widest"
               >
                 Phone Number
               </Label>
@@ -282,11 +282,11 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
                   id="phoneNumber"
                   {...register("phoneNumber")}
                   placeholder="+8801XXXXXXXXX"
-                  className="pl-10 h-11 border-gray-100 bg-gray-50/50 rounded-xl focus-visible:ring-amber-500 focus-visible:bg-white transition-all"
+                  className="pl-10 h-11 border-gray-100 bg-gray-50/50 rounded-xl focus-visible:ring-amber-500 focus-visible:bg-white transition-all text-gray-900"
                 />
               </div>
               {errors.phoneNumber && (
-                <p className="text-xs text-red-500">
+                <p className="text-xs text-red-500 font-medium">
                   {errors.phoneNumber.message}
                 </p>
               )}
@@ -296,7 +296,7 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
           <div className="space-y-2">
             <Label
               htmlFor="profileBio"
-              className="text-xs font-bold text-gray-400 uppercase tracking-widest"
+              className="text-xs font-bold text-gray-500 uppercase tracking-widest"
             >
               Professional Bio
             </Label>
@@ -305,17 +305,17 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
               {...register("profileBio")}
               placeholder="Tell us about yourself..."
               rows={3}
-              className="w-full text-sm p-3 border border-gray-100 bg-gray-50/50 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:bg-white transition-all resize-none"
+              className="w-full text-sm p-3 border border-gray-100 bg-gray-50/50 rounded-xl text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:bg-white transition-all resize-none"
             />
             {errors.profileBio && (
-              <p className="text-xs text-red-500">{errors.profileBio.message}</p>
+              <p className="text-xs text-red-500 font-medium">{errors.profileBio.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label
               htmlFor="profileSkills"
-              className="text-xs font-bold text-gray-400 uppercase tracking-widest"
+              className="text-xs font-bold text-gray-500 uppercase tracking-widest"
             >
               Skills{" "}
               <span className="normal-case font-normal text-gray-400">
@@ -330,7 +330,7 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
                 id="profileSkills"
                 {...register("profileSkills")}
                 placeholder="React, Next.js, Node.js..."
-                className="pl-10 h-11 border-gray-100 bg-gray-50/50 rounded-xl focus-visible:ring-amber-500 focus-visible:bg-white transition-all"
+                className="pl-10 h-11 border-gray-100 bg-gray-50/50 rounded-xl focus-visible:ring-amber-500 focus-visible:bg-white transition-all text-gray-900"
               />
             </div>
           </div>
@@ -341,7 +341,7 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
             <Button
               type="button"
               variant="outline"
-              className="flex-1 h-12 rounded-xl font-bold text-gray-500 hover:bg-gray-50 transition-all cursor-pointer"
+              className="flex-1 h-12 rounded-xl font-bold text-gray-500 border-gray-200 hover:bg-gray-50 transition-all cursor-pointer"
               onClick={() => setOpen(false)}
               disabled={isSubmitting}
             >

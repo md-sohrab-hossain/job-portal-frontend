@@ -12,6 +12,14 @@ services:
       - .env
     environment:
       - NEXT_PUBLIC_API_URL=http://job_portal_backend:5000
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+      - /app/.git
+    command: sh -c "pnpm install && pnpm dev"
     networks:
       - job-portal-network
     restart: unless-stopped

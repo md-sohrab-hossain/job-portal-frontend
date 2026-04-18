@@ -28,10 +28,9 @@ export const ROUTES = {
 
 export const getJobDetailsUrl = (id: string) => ROUTES.JOB_DETAILS(id);
 
-export const getFindJobsUrl = (search?: string, category?: string) => {
+export const getFindJobsUrl = (search?: string) => {
   const params = new URLSearchParams();
   if (search) params.set(ROUTES.QUERY_PARAMS.KEYWORD, search);
-  if (category) params.set(ROUTES.QUERY_PARAMS.CATEGORY, category);
   const query = params.toString();
   return query ? `${ROUTES.FIND_JOBS}?${query}` : ROUTES.FIND_JOBS;
 };
