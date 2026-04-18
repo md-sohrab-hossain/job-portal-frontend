@@ -4,6 +4,13 @@ import { Endpoints } from "./api-endpoints";
 let isRefreshing = false;
 let refreshQueue: Array<(success: boolean) => void> = [];
 
+export function warmupBackend() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (apiUrl && typeof window !== "undefined") {
+    window.open(apiUrl, "_blank");
+  }
+}
+
 async function refreshAccessToken(): Promise<boolean> {
   try {
     const res = await fetch(Endpoints.auth.refresh, {
