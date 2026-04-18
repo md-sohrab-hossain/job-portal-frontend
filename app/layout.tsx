@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/auth-context";
+import { BackendWarmup } from "@/components/BackendWarmup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen flex flex-col bg-background text-foreground">
         <AuthProvider>
+          <BackendWarmup />
           <Toaster position="bottom-right" richColors />
           <Navbar />
           <main className="grow">{children}</main>
