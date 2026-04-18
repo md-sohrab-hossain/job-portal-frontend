@@ -15,6 +15,7 @@ const LatestJobCard = ({ job }: { job: Job }) => {
               src={job.company!.logo!}
               alt={job.company!.name}
               fill
+              sizes="48px"
               className="object-contain rounded-lg"
             />
           ) : (

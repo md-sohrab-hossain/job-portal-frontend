@@ -13,7 +13,7 @@ const Dialog = ({ open, onOpenChange, children }: DialogProps) => {
     <>
       {open && (
         <div
-          className="fixed inset-0 z-50 bg-black/80"
+          className="fixed inset-0 z-[var(--z-modal)] bg-black/80"
           onClick={(e) => {
             if (e.target === e.currentTarget && onOpenChange) {
               onOpenChange(false)
@@ -35,7 +35,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
   ({ className, children, onClose, ...props }, ref) => (
     <div
       ref={ref}
-      className={`fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg ${className || ""}`}
+      className={`fixed left-[50%] top-[50%] z-[var(--z-modal)] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background text-gray-900 p-6 shadow-lg duration-200 sm:rounded-lg ${className || ""}`}
       {...props}
     >
       {children}

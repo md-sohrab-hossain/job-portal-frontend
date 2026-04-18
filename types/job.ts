@@ -2,6 +2,7 @@ import { type Company } from "@/types/company";
 
 export interface Job {
   id: string;
+  _id?: string;
   title: string;
   description: string;
   position: number;

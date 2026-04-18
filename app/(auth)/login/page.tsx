@@ -45,9 +45,11 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-start justify-center w-xl m-auto z-10">
-      <LoginForm onSubmit={onSubmit} />
-    </div>
+    <main className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-140px)]">
+      <div className="w-full max-w-md z-10">
+        <LoginForm onSubmit={onSubmit} />
+      </div>
+    </main>
   );
 };
 

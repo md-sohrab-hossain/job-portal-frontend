@@ -41,7 +41,7 @@ const LoginForm = ({ onSubmit }: LoginFormProps) => {
 
   return (
     <form
-      className="flex flex-col gap-2 w-full border border-gray-200 rounded p-4 bg-gray-100"
+      className="flex flex-col gap-5 w-full border border-gray-100 rounded-3xl p-8 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-gray-900"
       onSubmit={handleSubmit(onSubmit)}
     >
       {LOGIN_FORM_FIELDS.map((field) => (

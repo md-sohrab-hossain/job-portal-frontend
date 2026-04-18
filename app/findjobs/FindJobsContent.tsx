@@ -26,7 +26,7 @@ function FindJobsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState(
-    searchParams.get("keyword") || "",
+    searchParams.get("keyword") || searchParams.get("category") || "",
   );
   const [locationInput, setLocationInput] = useState(
     searchParams.get("location") || "",
@@ -34,7 +34,8 @@ function FindJobsContent() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const currentParams: SearchParams = {
-    keyword: searchParams.get("keyword") || undefined,
+    keyword:
+      searchParams.get("keyword") || searchParams.get("category") || undefined,
     location: searchParams.get("location") || undefined,
     jobType: searchParams.get("jobType") || undefined,
     salary: searchParams.get("salary") || undefined,
@@ -53,13 +54,15 @@ function FindJobsContent() {
 
       const data = await api.jobs.getAll(cleanParams);
 
-      if (data.success && data.data) {
-        const normalized = (data.data as any[]).map((j: any) => ({
-          ...j,
-          id: j.id || j._id,
-          company: j.company ? { ...j.company, id: j.company.id || j.company._id } : j.company
-        }));
-        setJobs(normalized);
+if (data.success && data.data) {
+          const normalized = (data.data as JobType[]).map((j) => ({
+            ...j,
+            id: j.id || j._id || "",
+            company: j.company
+              ? { ...j.company, id: j.company.id || j.company._id || "" }
+              : j.company,
+          }));
+          setJobs(normalized);
       } else {
         setError(data.message || data.error || "Failed to fetch jobs");
         setJobs([]);
@@ -93,10 +96,12 @@ function FindJobsContent() {
         if (!mounted) return;
 
         if (data.success && data.data) {
-          const normalized = (data.data as any[]).map((j: any) => ({
+          const normalized = (data.data as JobType[]).map((j) => ({
             ...j,
-            id: j.id || j._id,
-            company: j.company ? { ...j.company, id: j.company.id || j.company._id } : j.company
+            id: j.id || j._id || "",
+            company: j.company
+              ? { ...j.company, id: j.company.id || j.company._id || "" }
+              : j.company,
           }));
           setJobs(normalized);
         } else {
