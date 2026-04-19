@@ -17,10 +17,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Add build arguments for Next.js build-time environment variables
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_CLOUDINARY_NAME
-ARG NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+# Add build arguments with default values for production
+ARG NEXT_PUBLIC_API_URL=https://job-portal-backend-main.onrender.com
+ARG NEXT_PUBLIC_CLOUDINARY_NAME=sajal-cnq
+ARG NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=job-portal
 
 # Set as environment variables for the build process
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
