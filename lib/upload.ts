@@ -78,7 +78,7 @@ export function validateFile(file: File, type: FileType): string | null {
  */
 const CLOUDINARY_RESOURCE_TYPE: Record<FileType, "image" | "raw" | "auto"> = {
   photo: "image",
-  resume: "auto",  // auto = let Cloudinary pick; works with all preset configs
+  resume: "auto", // auto = let Cloudinary pick; works with all preset configs
   companyLogo: "image",
 };
 
@@ -93,10 +93,13 @@ export async function uploadToCloudinary(
   }
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "job-portal";
+  const uploadPreset =
+    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "job-portal";
 
   if (!cloudName) {
-    throw new Error("Cloudinary configuration missing");
+    throw new Error(
+      "Cloudinary configuration missing: NEXT_PUBLIC_CLOUDINARY_NAME is not defined.",
+    );
   }
 
   const resourceType = CLOUDINARY_RESOURCE_TYPE[type];
@@ -114,7 +117,7 @@ export async function uploadToCloudinary(
     {
       method: "POST",
       body: formData,
-    }
+    },
   );
 
   if (!response.ok) {
@@ -132,7 +135,7 @@ export async function uploadToCloudinary(
 
     if (response.status === 401) {
       throw new Error(
-        "Upload failed (401): make sure your Cloudinary upload preset is set to 'Unsigned' mode in the Cloudinary dashboard."
+        "Upload failed (401): make sure your Cloudinary upload preset is set to 'Unsigned' mode in the Cloudinary dashboard.",
       );
     }
     throw new Error(errorMessage);
@@ -155,7 +158,9 @@ export async function uploadToCloudinary(
  * Since PDF delivery is now enabled in settings, the native Cloudinary URL
  * will correctly serve the PDF inline in the browser.
  */
-export function getCloudinaryPdfViewUrl(url: string | null | undefined): string | null {
+export function getCloudinaryPdfViewUrl(
+  url: string | null | undefined,
+): string | null {
   return url || null;
 }
 
@@ -163,7 +168,9 @@ export function getCloudinaryPdfViewUrl(url: string | null | undefined): string 
  * Returns the direct Cloudinary URL for downloading a PDF.
  * Used in <a download> links — the browser will prompt a save dialog.
  */
-export function getCloudinaryPdfUrl(url: string | null | undefined): string | null {
+export function getCloudinaryPdfUrl(
+  url: string | null | undefined,
+): string | null {
   if (!url) return null;
   return url;
 }

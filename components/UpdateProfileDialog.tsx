@@ -46,7 +46,9 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
   // Resume state
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [currentResumeUrl, setCurrentResumeUrl] = useState<string | null>(null);
-  const [currentResumeOriginalName, setCurrentResumeOriginalName] = useState<string | null>(null);
+  const [currentResumeOriginalName, setCurrentResumeOriginalName] = useState<
+    string | null
+  >(null);
   const [resumeRemoved, setResumeRemoved] = useState(false);
 
   const {
@@ -106,14 +108,22 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
     try {
       let finalPhotoUrl = currentPhotoUrl;
       let finalResumeUrl = resumeRemoved ? null : currentResumeUrl;
-      let finalResumeOriginalName = resumeRemoved ? null : currentResumeOriginalName;
+      let finalResumeOriginalName = resumeRemoved
+        ? null
+        : currentResumeOriginalName;
 
       const folder = UPLOAD_FOLDERS.users(userId as string);
 
       // Upload both files concurrently if selected
       const uploadPromises = [];
-      let photoUploadPromise: Promise<{ secure_url: string; url: string }> | null = null;
-      let resumeUploadPromise: Promise<{ secure_url: string; url: string }> | null = null;
+      let photoUploadPromise: Promise<{
+        secure_url: string;
+        url: string;
+      }> | null = null;
+      let resumeUploadPromise: Promise<{
+        secure_url: string;
+        url: string;
+      }> | null = null;
 
       if (photoFile) {
         photoUploadPromise = uploadToCloudinary(photoFile, "photo", {
@@ -148,9 +158,9 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
         profileBio: data.profileBio || null,
         profileSkills: data.profileSkills
           ? data.profileSkills
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
           : [],
         profilePhoto: finalPhotoUrl || null,
         profileResume: finalResumeUrl,
@@ -168,7 +178,11 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
       }
     } catch (err) {
       console.error(err);
-      toast.error("An error occurred while updating profile");
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "An error occurred while updating profile";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -176,8 +190,8 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[600px] border-none shadow-2xl rounded-3xl p-0 overflow-hidden">
-        <div className="bg-gradient-to-tr from-amber-500 to-orange-500 p-8 text-white relative shrink-0">
+      <DialogContent className="sm:max-w-150 border-none shadow-2xl rounded-3xl p-0 overflow-hidden">
+        <div className="bg-linear-to-tr from-amber-500 to-orange-500 p-8 text-white relative shrink-0">
           <button
             onClick={() => setOpen(false)}
             className="absolute right-3 top-3 p-2 cursor-pointer rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all group/close"
@@ -242,7 +256,9 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
               />
             </div>
             {errors.fullname && (
-              <p className="text-xs text-red-500 font-medium">{errors.fullname.message}</p>
+              <p className="text-xs text-red-500 font-medium">
+                {errors.fullname.message}
+              </p>
             )}
           </div>
 
@@ -308,7 +324,9 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
               className="w-full text-sm p-3 border border-gray-100 bg-gray-50/50 rounded-xl text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:bg-white transition-all resize-none"
             />
             {errors.profileBio && (
-              <p className="text-xs text-red-500 font-medium">{errors.profileBio.message}</p>
+              <p className="text-xs text-red-500 font-medium">
+                {errors.profileBio.message}
+              </p>
             )}
           </div>
 
@@ -334,7 +352,6 @@ const UpdateProfileDialog: React.FC<UpdateProfileDialogProps> = ({
               />
             </div>
           </div>
-
 
           {/* ── Actions ── */}
           <div className="flex gap-3 pt-2">
