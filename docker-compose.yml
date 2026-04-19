@@ -1,17 +1,21 @@
-version: '3.8'
+version: "3.8"
 
 services:
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=https://job-portal-backend-main.onrender.com
+        - NEXT_PUBLIC_CLOUDINARY_NAME=sajal-cnq
+        - NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=job-portal
     container_name: job_portal_frontend
     ports:
       - "3000:3000"
     env_file:
       - .env
     environment:
-      - NEXT_PUBLIC_API_URL=http://job_portal_backend:5000
+      - NEXT_PUBLIC_API_URL=https://job-portal-backend-main.onrender.com
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
     volumes:
