@@ -30,10 +30,9 @@ export function handleError(error: unknown) {
     });
   }
 
+  // TODO: Re-hide this in final production for security
   const message =
-    process.env.NODE_ENV === "development" && error instanceof Error
-      ? error.message
-      : "Internal server error";
+    error instanceof Error ? error.message : "Internal server error";
 
   return NextResponse.json(formatError(500, message), { status: 500 });
 }
