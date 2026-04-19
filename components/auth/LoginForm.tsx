@@ -31,9 +31,9 @@ const LoginForm = ({ onSubmit }: LoginFormProps) => {
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
-      role: undefined,
+      email: "testuser@gmail.com",
+      password: "@Test12345678",
+      role: "student",
     },
   });
 
