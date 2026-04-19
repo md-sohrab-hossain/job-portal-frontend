@@ -11,11 +11,21 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm config set allow-build-scripts true
 RUN pnpm install
 
-# Rebuild the source code only when needed
+# Build source code
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Add build arguments for Next.js build-time environment variables
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_CLOUDINARY_NAME
+ARG NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+
+# Set as environment variables for the build process
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_CLOUDINARY_NAME=$NEXT_PUBLIC_CLOUDINARY_NAME
+ENV NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=$NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN pnpm run build
