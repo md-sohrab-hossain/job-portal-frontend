@@ -47,9 +47,11 @@ async function authHandler(
     });
 
     return nextResponse;
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Fetch failed";
     const fetchError = new Error(
-      `${error.message || "Fetch failed"} | Destination: ${API_URL}${endpoint}`,
+      `${errorMessage} | Destination: ${API_URL}${endpoint}`,
     );
     return handleError(fetchError);
   }
